@@ -1,4 +1,4 @@
-import type { Area, Flag, Intent } from '@/lib/types'
+import type { Area, Flag, FlagType, Intent } from '@/lib/types'
 import ScoreCircle from '@/components/shared/ScoreCircle'
 import FlagCard from '@/components/shared/FlagCard'
 import ShareButtons from '@/components/shared/ShareButtons'
@@ -27,12 +27,11 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
 
   const flags: Flag[] = [
     {
-      type:
-        area.flood_risk === 'low'
+      type: (area.flood_risk === 'low'
           ? 'good'
           : area.flood_risk === 'moderate'
           ? 'warn'
-          : 'danger',
+          : 'danger') as FlagType,
       icon: 'ti-droplet',
       title: `Flood risk: ${area.flood_risk.replace('_', ' ')}`,
       body:
@@ -43,20 +42,20 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
           : 'High flood risk. Confirm plot elevation above 4m MSL before any payment.',
     },
     {
-      type: 'danger',
+      type: 'danger' as FlagType,
       icon: 'ti-ripple',
       title: 'CRZ boundary — verify urgently',
       body:
         'Plot may be within 500m of shoreline. CZMA regulations may prohibit permanent construction. Check with TNCZMA before payment.',
     },
     {
-      type: gap <= 15 ? 'good' : gap <= 30 ? 'warn' : 'danger',
+      type: (gap <= 15 ? 'good' : gap <= 30 ? 'warn' : 'danger') as FlagType,
       icon: 'ti-currency-rupee',
       title: `Broker quoting ${gap}% above registered prices`,
       body: `Area average: ₹${area.reg_avg_psf.toLocaleString()}/sqft registered. Broker asking ₹${area.broker_ask_psf.toLocaleString()}/sqft. Cross-check on Zapkey before negotiating.`,
     },
     {
-      type: area.growth_type === 'good' ? 'good' : 'warn',
+      type: (area.growth_type === 'good' ? 'good' : 'warn') as FlagType,
       icon: 'ti-trending-up',
       title: 'Price growth signal',
       body: area.growth_label,
