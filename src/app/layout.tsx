@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -89,6 +90,18 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-85NYW7J1VF"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-85NYW7J1VF');
+          `}
+        </Script>
         <div className="glow-orb-1" aria-hidden="true" />
         <div className="glow-orb-2" aria-hidden="true" />
         {children}
