@@ -22,6 +22,7 @@ interface DecisionPanelProps {
   areas: Area[]
   initialSlug?: string | null
   onIntentSelect?: (intent: string) => void
+  onReportView?: () => boolean
 }
 
 const AREA_COORDINATES: Record<string, [number, number]> = {
@@ -70,6 +71,7 @@ export default function DecisionPanel({
   areas,
   initialSlug = null,
   onIntentSelect,
+  onReportView,
 }: DecisionPanelProps) {
   const initialArea = findAreaBySlug(areas, initialSlug)
 
@@ -80,6 +82,7 @@ export default function DecisionPanel({
   const [pinDropped, setPinDropped] = useState(!!initialSlug)
   const [selectedArea, setSelectedArea] = useState<Area | null>(initialArea)
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null)
+  const [canShowReport, setCanShowReport] = useState(false)
 
   function flyToArea(slug: string) {
     const coords = AREA_COORDINATES[slug]
@@ -135,8 +138,16 @@ export default function DecisionPanel({
     setShowSuggestions(false)
   }
 
-  const showReport = pinDropped && selectedIntent && selectedArea
   const showNotFound = pinDropped && selectedIntent && !selectedArea
+
+  useEffect(() => {
+    if (!pinDropped || !selectedIntent || !selectedArea) {
+      setCanShowReport(false)
+      return
+    }
+    const allowed = onReportView ? onReportView() : true
+    setCanShowReport(allowed)
+  }, [pinDropped, selectedIntent, selectedArea?.slug, onReportView, selectedArea])
 
   return (
     <div className="flex flex-col gap-4">
@@ -288,7 +299,7 @@ export default function DecisionPanel({
         />
       )}
 
-      {showReport && selectedArea && (
+      {canShowReport && selectedArea && selectedIntent && (
         <PropertyReport
           area={selectedArea}
           intent={selectedIntent}
