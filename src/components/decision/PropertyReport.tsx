@@ -107,7 +107,7 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
     },
   ].filter((flag) => flag.title !== 'CRZ boundary — verify urgently' || area.czr_risk)
 
-  const shareMessage = `Checked ${area.name} on PropXLA — scored ${result.overall}/100 for ${intent}. Broker is ${gap}% above registered prices.`
+  const shareMessage = `Checked ${area.name} on PropNXT — scored ${result.overall}/100 for ${intent}. Broker is ${gap}% above registered prices.`
   const shareUrl = `https://propxla.com/report/${area.slug}`
 
   const metrics = [

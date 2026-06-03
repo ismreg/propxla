@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import type { Area } from '@/lib/types'
-import Header from '@/components/layout/Header'
+import AppShell from '@/components/layout/AppShell'
 import TabBar from '@/components/layout/TabBar'
 import DiscoveryPanel from '@/components/discovery/DiscoveryPanel'
 import DecisionPanel from '@/components/decision/DecisionPanel'
@@ -30,61 +30,39 @@ export default function PropXLAApp({ areas }: PropXLAAppProps) {
   const [activeTab, setActiveTab] = useState<'disc' | 'dec'>('disc')
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
 
-  const {
-    user,
-    showAuthModal,
-    setShowAuthModal,
-    signInWithGoogle,
-    signOut,
-  } = useAuth()
+  const { showAuthModal, setShowAuthModal, signInWithGoogle } = useAuth()
+
+  function handleAreaSelect(slug: string) {
+    const area = areas.find((a) => a.slug === slug)
+    logSearch({ area_slug: slug, corridor: area?.corridor })
+    setSelectedSlug(slug)
+    setActiveTab('dec')
+  }
+
+  function handleIntentSelect(intent: string) {
+    logSearch({ area_slug: selectedSlug ?? undefined, intent })
+  }
 
   return (
-    <div className="relative z-10 mx-auto max-w-2xl px-4 py-0">
-      <div className="glow-orb-1" />
-      <div className="glow-orb-2" />
-      <Header />
-      {user && (
-        <div className="-mx-4 mb-4 flex items-center justify-between border-b border-[rgba(29,158,117,0.3)] bg-[rgba(29,158,117,0.15)] px-4 py-1.5">
-          <span className="text-xs text-[#5DCAA5]">
-            <i className="ti ti-circle-check mr-1" />
-            Signed in as {user.email}
-          </span>
-          <button
-            type="button"
-            onClick={signOut}
-            className="text-xs text-[#9FE1CB] underline"
-          >
-            Sign out
-          </button>
-        </div>
-      )}
-      <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
-
-      {activeTab === 'disc' ? (
-        <DiscoveryPanel
-          areas={areas}
-          onAreaSelect={(slug) => {
-            const area = areas.find((a) => a.slug === slug)
-            logSearch({ area_slug: slug, corridor: area?.corridor })
-            setSelectedSlug(slug)
-            setActiveTab('dec')
-          }}
+    <AppShell>
+      <div style={{ paddingTop: '16px', paddingBottom: '40px' }}>
+        <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+        {activeTab === 'disc' && (
+          <DiscoveryPanel areas={areas} onAreaSelect={handleAreaSelect} />
+        )}
+        {activeTab === 'dec' && (
+          <DecisionPanel
+            areas={areas}
+            initialSlug={selectedSlug}
+            onIntentSelect={handleIntentSelect}
+          />
+        )}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSignIn={signInWithGoogle}
         />
-      ) : (
-        <DecisionPanel
-          areas={areas}
-          initialSlug={selectedSlug}
-          onIntentSelect={(intent) => {
-            logSearch({ area_slug: selectedSlug ?? undefined, intent })
-          }}
-        />
-      )}
-
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSignIn={signInWithGoogle}
-      />
-    </div>
+      </div>
+    </AppShell>
   )
 }

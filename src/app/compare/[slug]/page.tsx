@@ -41,7 +41,7 @@ export async function generateMetadata({
   const parsed = parseCompareSlugs(slug)
 
   if (!parsed) {
-    return { title: 'Compare · PropXLA' }
+    return { title: 'Compare · PropNXT' }
   }
 
   const { slug1, slug2 } = parsed
@@ -51,7 +51,7 @@ export async function generateMetadata({
   ])
 
   if (!area1 || !area2) {
-    return { title: 'Compare · PropXLA' }
+    return { title: 'Compare · PropNXT' }
   }
 
   const intent = resolveIntent(intentParam)
@@ -59,7 +59,7 @@ export async function generateMetadata({
   const score2 = computeScore(area2, intent).overall
   const winnerName = score1 >= score2 ? area1.name : area2.name
 
-  const title = `${area1.name} vs ${area2.name} · PropXLA Compare`
+  const title = `${area1.name} vs ${area2.name} · PropNXT Compare`
   const description = `${area1.name} (${score1}/100) vs ${area2.name} (${score2}/100) for ${intent}. ${winnerName} is the better pick.`
 
   return {

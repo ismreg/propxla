@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import AppShell from '@/components/layout/AppShell'
 import type { AdminAreaSummary, ParsedAreaUpdate } from '@/lib/admin-types'
 
 interface AdminUpdateClientProps {
@@ -115,30 +116,24 @@ export default function AdminUpdateClient({ adminKey }: AdminUpdateClientProps) 
   }
 
   return (
-    <div className="relative z-10 min-h-screen">
-      <div className="glow-orb-1" />
-      <div className="glow-orb-2" />
-      <div className="mx-auto max-w-2xl px-4 py-8">
-        <header className="mb-8">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-white">
-              Prop<span style={{ color: '#5DCAA5' }}>XLA</span>
-            </span>
-            <span
-              className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-              style={{
-                background: 'rgba(186,117,23,0.20)',
-                color: '#FAC775',
-                border: '0.5px solid rgba(186,117,23,0.40)',
-              }}
-            >
-              Data Admin
-            </span>
-          </div>
-          <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>
+    <AppShell
+        topBarRight={
+          <span
+            className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+            style={{
+              background: 'rgba(186,117,23,0.20)',
+              color: '#FAC775',
+              border: '0.5px solid rgba(186,117,23,0.40)',
+            }}
+          >
+            Data Admin
+          </span>
+        }
+      >
+        <div className="py-8">
+          <p className="mb-8 text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>
             Internal tool · Not for public use
           </p>
-        </header>
 
         {saveStatus === 'success' && (
           <div
@@ -264,7 +259,7 @@ Or paste a table copied from Zapkey directly.`}
             </button>
           </section>
         )}
-      </div>
-    </div>
+        </div>
+    </AppShell>
   )
 }

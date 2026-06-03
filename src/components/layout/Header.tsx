@@ -6,7 +6,7 @@ export default function Header() {
           style={{ fontSize: 17, fontWeight: 500, letterSpacing: '-0.02em' }}
         >
           <span className="text-white">Prop</span>
-          <span style={{ color: '#1D9E75' }}>XLA</span>
+          <span style={{ color: '#1D9E75' }}>NXT</span>
         </div>
         <div className="text-xs" style={{ marginTop: 2, color: 'rgba(255,255,255,0.40)' }}>
           Chennai · OMR &amp; ECR corridors
