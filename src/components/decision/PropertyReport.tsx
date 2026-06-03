@@ -24,11 +24,11 @@ function scoreColor(score: number): string {
   return '#791F1F'
 }
 
-function verdictSummary(score: number): string {
-  if (score >= 80) return 'Strong investment signal for this corridor'
-  if (score >= 65) return 'Solid pick — key risks flagged below'
-  if (score >= 50) return 'Proceed carefully — verify risks before paying'
-  return 'High risk area — review all flags before deciding'
+function progressBarColor(score: number): string {
+  if (score >= 80) return '#1D9E75'
+  if (score >= 65) return '#639922'
+  if (score >= 50) return '#BA7517'
+  return '#E24B4A'
 }
 
 export default function PropertyReport({ area, intent, address }: PropertyReportProps) {
@@ -64,7 +64,7 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
       type: (gap <= 15 ? 'good' : gap <= 30 ? 'warn' : 'danger') as FlagType,
       icon: 'ti-currency-rupee',
       title: `Broker quoting ${gap}% above registered prices`,
-      body: `Area average: ₹${area.reg_avg_psf.toLocaleString()}/sqft registered. Broker asking ₹${area.broker_ask_psf.toLocaleString()}/sqft. Cross-check on Zapkey before negotiating.`,
+      body: `Registered avg ₹${area.reg_avg_psf.toLocaleString()}/sqft · Broker asking ₹${area.broker_ask_psf.toLocaleString()}/sqft · Verify on Zapkey`,
     },
     {
       type: (area.growth_type === 'good' ? 'good' : 'warn') as FlagType,
@@ -103,6 +103,19 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
   )
   const yearSpan = trendPoints.length - 1
 
+  const verdictSummary = () => {
+    if (result.overall >= 80) {
+      return `Strong ${intent} signal — this corridor suits your goal well`
+    }
+    if (result.overall >= 65) {
+      return `Solid pick for ${intent} — key risks flagged below`
+    }
+    if (result.overall >= 50) {
+      return `Moderate fit for ${intent} — verify all risks before paying`
+    }
+    return `High risk for ${intent} — review every flag before deciding`
+  }
+
   return (
     <div className="flex flex-col">
       {/* Section 1 — Hero */}
@@ -134,7 +147,7 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
           </div>
         </div>
         <p className="mt-3 border-t border-gray-100 pt-3 text-xs text-gray-500">
-          {verdictSummary(result.overall)}
+          {verdictSummary()}
         </p>
       </div>
 
@@ -154,7 +167,7 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
                 className="h-[3px] rounded-full transition-all duration-500"
                 style={{
                   width: `${metric.value}%`,
-                  backgroundColor: scoreColor(metric.value),
+                  backgroundColor: progressBarColor(metric.value),
                 }}
               />
             </div>
@@ -296,6 +309,32 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
             {growthPct >= 0 ? '+' : ''}
             {growthPct}% in {yearSpan} years
           </span>
+        </div>
+
+        <div className="mt-3 border-t border-gray-100 pt-3">
+          <div className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">
+            Recent registered sales
+          </div>
+          {area.transactions.slice(0, 3).map((transaction) => (
+            <div
+              key={`${transaction.unit}-${transaction.date}`}
+              className="flex items-center justify-between border-b border-gray-50 py-1.5 last:border-0"
+            >
+              <div>
+                <div className="text-xs text-gray-600">{transaction.unit}</div>
+                <div className="mt-0.5 text-[10px] text-gray-400">{transaction.date}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-semibold text-gray-800">{transaction.total}</div>
+                <div className="mt-0.5 text-[10px] text-gray-400">
+                  ₹{transaction.psf}/sqft
+                </div>
+              </div>
+            </div>
+          ))}
+          <p className="mt-2 text-right text-[10px] text-gray-300">
+            Source: Registered sale data · TNREGINET
+          </p>
         </div>
       </div>
 
