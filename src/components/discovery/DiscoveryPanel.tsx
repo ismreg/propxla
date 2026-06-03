@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import type { Area } from '@/lib/types'
-import FilterChips from '@/components/discovery/FilterChips'
 import AreaCard from '@/components/discovery/AreaCard'
 import { DISCOVERY_FILTERS } from '@/lib/constants'
 
@@ -14,6 +13,7 @@ interface DiscoveryPanelProps {
 export default function DiscoveryPanel({ areas, onAreaSelect }: DiscoveryPanelProps) {
   const [activeFilter, setActiveFilter] = useState('omr-invest')
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchFocused, setSearchFocused] = useState(false)
 
   const filter = DISCOVERY_FILTERS.find((f) => f.key === activeFilter)
   const query = searchQuery.trim().toLowerCase()
@@ -25,28 +25,125 @@ export default function DiscoveryPanel({ areas, onAreaSelect }: DiscoveryPanelPr
 
   return (
     <div>
-      <div className="relative">
-        <i
-          className="ti ti-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
-          style={{ fontSize: 16, color: 'rgba(255,255,255,0.40)' }}
-        />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search area — e.g. Sholinganallur, Kovalam..."
-          className="w-full py-3 pl-10 pr-4 text-sm"
-        />
+      <div
+        className="mb-4"
+        style={{
+          background: 'rgba(255,255,255,0.04)',
+          border: '0.5px solid rgba(255,255,255,0.08)',
+          borderRadius: 20,
+          padding: '20px 16px 16px',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+        }}
+      >
+        <h2
+          className="text-center"
+          style={{
+            fontSize: 20,
+            fontWeight: 700,
+            color: 'white',
+            letterSpacing: '-0.02em',
+            marginBottom: 6,
+          }}
+        >
+          Find your next property in Chennai
+        </h2>
+        <p
+          className="text-center"
+          style={{
+            fontSize: 12,
+            color: 'rgba(255,255,255,0.40)',
+            marginBottom: 16,
+          }}
+        >
+          Real registered prices · Flood risk · Growth signals
+        </p>
+
+        <div className="relative w-full">
+          <i
+            className="ti ti-search pointer-events-none absolute top-1/2 -translate-y-1/2"
+            style={{
+              left: 16,
+              fontSize: 18,
+              color: searchFocused ? '#1D9E75' : 'rgba(255,255,255,0.50)',
+            }}
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+            placeholder="Search area — e.g. Sholinganallur, Kovalam..."
+            className="hero-search-input w-full text-white"
+          />
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <div
+            style={{
+              fontSize: 10,
+              color: 'rgba(255,255,255,0.30)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              marginBottom: 8,
+            }}
+          >
+            Quick filters
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {DISCOVERY_FILTERS.map((f) => {
+              const isActive = f.key === activeFilter
+              return (
+                <span
+                  key={f.key}
+                  onClick={() => setActiveFilter(f.key)}
+                  className="cursor-pointer"
+                  style={{
+                    fontSize: 12,
+                    padding: '4px 12px',
+                    borderRadius: 999,
+                    fontWeight: isActive ? 500 : 400,
+                    ...(isActive
+                      ? {
+                          background: '#1D9E75',
+                          color: 'white',
+                          border: 'none',
+                        }
+                      : {
+                          background: 'rgba(255,255,255,0.08)',
+                          border: '0.5px solid rgba(255,255,255,0.12)',
+                          color: 'rgba(255,255,255,0.50)',
+                        }),
+                  }}
+                >
+                  {f.label}
+                </span>
+              )
+            })}
+          </div>
+        </div>
       </div>
 
-      <FilterChips activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+      <div
+        className="mb-2 flex items-center justify-between uppercase tracking-wide"
+        style={{
+          fontSize: 11,
+          color: 'rgba(255,255,255,0.35)',
+        }}
+      >
+        <span>Ranked areas</span>
+        <span>
+          {filtered.length} {filtered.length === 1 ? 'area' : 'areas'}
+        </span>
+      </div>
 
       {filtered.length === 0 ? (
         <div className="py-8 text-center text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
           No areas found. Try a different filter.
         </div>
       ) : (
-        <div className="mt-3 flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
           {filtered.map((area, index) => (
             <AreaCard
               key={area.slug}
