@@ -67,10 +67,14 @@ export interface Area {
 // ============================================
 
 export interface SearchLog {
-  area_slug: string
-  intent: Intent | null
-  budget_lakhs: number | null
-  corridor: Corridor | null
+  area_slug?: string | null
+  intent?: Intent | null
+  budget_lakhs?: number | null
+  corridor?: Corridor | null
+  address?: string | null
+  lat?: number | null
+  lng?: number | null
+  in_service_area?: boolean | null
 }
 
 // ============================================

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import type { Area } from '@/lib/types'
@@ -59,9 +59,73 @@ const AREA_COORDINATES: Record<string, [number, number]> = {
   poonamallee: [80.1167, 13.0500],
 }
 
+type NearestAreaMatch = {
+  area: Area
+  distance: number
+  area_lat: number
+  area_lng: number
+}
+
 function findAreaBySlug(areas: Area[], slug: string | null | undefined): Area | null {
   if (!slug) return null
   return areas.find((area) => area.slug === slug) ?? null
+}
+
+function findNearestArea(
+  areas: Area[],
+  lat: number,
+  lng: number
+): NearestAreaMatch | null {
+  let nearest: NearestAreaMatch | null = null
+  let minDist = Infinity
+
+  for (const area of areas) {
+    const coords = AREA_COORDINATES[area.slug]
+    if (!coords) continue
+
+    const R = 6371
+    const dLat = ((lat - coords[1]) * Math.PI) / 180
+    const dLng = ((lng - coords[0]) * Math.PI) / 180
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((coords[1] * Math.PI) / 180) *
+        Math.cos((lat * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2)
+    const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+    if (dist < minDist) {
+      minDist = dist
+      nearest = {
+        area,
+        distance: dist,
+        area_lat: coords[1],
+        area_lng: coords[0],
+      }
+    }
+  }
+
+  return nearest
+}
+
+async function logAddressSearch(
+  address: string,
+  lat: number,
+  lng: number,
+  matchedSlug?: string,
+  isInServiceArea?: boolean
+) {
+  fetch('/api/log-address-search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      address,
+      lat,
+      lng,
+      matched_area_slug: matchedSlug || null,
+      is_in_service_area: isInServiceArea || false,
+    }),
+  }).catch(() => {})
 }
 
 const STEPS = [
@@ -94,23 +158,93 @@ export default function DecisionPanel({
   onIntentSelect,
 }: DecisionPanelProps) {
   const router = useRouter()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
   const initialArea = findAreaBySlug(areas, initialSlug)
 
   const [inputValue, setInputValue] = useState(initialArea?.name ?? '')
   const [suggestions, setSuggestions] = useState<Area[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [placesReady, setPlacesReady] = useState(false)
   const [selectedIntent, setSelectedIntent] = useState<string | null>(null)
   const [selectedArea, setSelectedArea] = useState<Area | null>(initialArea)
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null)
+  const [pinDropped, setPinDropped] = useState(Boolean(initialArea))
+  const [outOfServiceArea, setOutOfServiceArea] = useState(false)
+  const [outOfServiceAddress, setOutOfServiceAddress] = useState('')
 
   const reportReady = Boolean(selectedIntent && selectedArea)
 
-  function flyToArea(slug: string) {
+  const flyToArea = useCallback((slug: string) => {
     const coords = AREA_COORDINATES[slug]
     if (coords) {
       setMapCenter({ lng: coords[0], lat: coords[1] })
     }
-  }
+  }, [])
+
+  const handleAddressSelected = useCallback(
+    async (lat: number, lng: number, address: string) => {
+      setInputValue(address)
+      setShowSuggestions(false)
+
+      const matched = findNearestArea(areas, lat, lng)
+      const inService = Boolean(matched && matched.distance <= 3.0)
+
+      await logAddressSearch(
+        address,
+        lat,
+        lng,
+        inService && matched ? matched.area.slug : undefined,
+        inService
+      )
+
+      if (inService && matched) {
+        setSelectedArea(matched.area)
+        setPinDropped(true)
+        setMapCenter({ lat: matched.area_lat, lng: matched.area_lng })
+        setOutOfServiceArea(false)
+        setOutOfServiceAddress('')
+      } else {
+        setSelectedArea(null)
+        setPinDropped(true)
+        setOutOfServiceArea(true)
+        setOutOfServiceAddress(address)
+        setMapCenter({ lat, lng })
+      }
+    },
+    [areas]
+  )
+
+  const initAutocomplete = useCallback(() => {
+    const input = document.getElementById('address-search-input') as HTMLInputElement | null
+    if (!input || !window.google?.maps?.places) return
+
+    if (autocompleteRef.current) return
+
+    const autocomplete = new window.google.maps.places.Autocomplete(input, {
+      componentRestrictions: { country: 'in' },
+      bounds: new window.google.maps.LatLngBounds(
+        { lat: 12.6, lng: 80.05 },
+        { lat: 13.1, lng: 80.35 }
+      ),
+      strictBounds: false,
+      types: ['geocode', 'establishment'],
+    })
+
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace()
+      if (!place.geometry?.location) return
+
+      const lat = place.geometry.location.lat()
+      const lng = place.geometry.location.lng()
+      const formattedAddress = place.formatted_address || place.name || ''
+
+      handleAddressSelected(lat, lng, formattedAddress)
+    })
+
+    autocompleteRef.current = autocomplete
+    setPlacesReady(true)
+  }, [handleAddressSelected])
 
   useEffect(() => {
     if (!initialSlug) return
@@ -118,12 +252,46 @@ export default function DecisionPanel({
     if (area) {
       setSelectedArea(area)
       setInputValue(area.name)
+      setPinDropped(true)
+      setOutOfServiceArea(false)
       flyToArea(initialSlug)
     }
-  }, [initialSlug, areas])
+  }, [initialSlug, areas, flyToArea])
+
+  useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY
+    if (!apiKey) return
+
+    if (window.google?.maps?.places) {
+      initAutocomplete()
+      return
+    }
+
+    const existing = document.querySelector('script[data-google-places]')
+    if (existing) {
+      existing.addEventListener('load', initAutocomplete)
+      return () => existing.removeEventListener('load', initAutocomplete)
+    }
+
+    const script = document.createElement('script')
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
+    script.async = true
+    script.dataset.googlePlaces = 'true'
+    script.onload = () => initAutocomplete()
+    document.head.appendChild(script)
+
+    return () => {
+      script.onload = null
+    }
+  }, [initAutocomplete])
 
   function handleInputChange(value: string) {
     setInputValue(value)
+    if (outOfServiceArea) {
+      setOutOfServiceArea(false)
+      setOutOfServiceAddress('')
+    }
+
     const matches = areas.filter((area) =>
       area.name.toLowerCase().includes(value.toLowerCase())
     )
@@ -134,12 +302,35 @@ export default function DecisionPanel({
   function selectArea(area: Area) {
     setInputValue(area.name)
     setSelectedArea(area)
+    setPinDropped(true)
     setShowSuggestions(false)
+    setOutOfServiceArea(false)
+    setOutOfServiceAddress('')
     flyToArea(area.slug)
   }
 
-  function handlePinDrop(_lat: number, _lng: number) {
-    setSelectedArea((current) => current ?? areas[0] ?? null)
+  function handleSearchAnotherArea() {
+    setOutOfServiceArea(false)
+    setOutOfServiceAddress('')
+    setInputValue('')
+    setSelectedArea(null)
+    setPinDropped(false)
+    setShowSuggestions(false)
+    inputRef.current?.focus()
+  }
+
+  function handleUseNearestArea() {
+    const lat = mapCenter?.lat ?? 12.9
+    const lng = mapCenter?.lng ?? 80.2
+    const nearest = findNearestArea(areas, lat, lng)
+    if (!nearest) return
+
+    setSelectedArea(nearest.area)
+    setOutOfServiceArea(false)
+    setOutOfServiceAddress('')
+    setInputValue(`${nearest.area.name} (nearest area)`)
+    setPinDropped(true)
+    setMapCenter({ lat: nearest.area_lat, lng: nearest.area_lng })
   }
 
   function handleIntentSelect(intent: string) {
@@ -152,6 +343,8 @@ export default function DecisionPanel({
     const intent = selectedIntent || 'investment'
     router.push(`/report/${selectedArea.slug}?intent=${intent}`)
   }
+
+  const showAreaFallback = showSuggestions && suggestions.length > 0
 
   return (
     <div className="flex flex-col gap-4">
@@ -243,32 +436,37 @@ export default function DecisionPanel({
         })}
       </div>
 
-      <IntentSelector
-        selectedIntent={selectedIntent}
-        onIntentSelect={handleIntentSelect}
-      />
+      {!outOfServiceArea && (
+        <IntentSelector
+          selectedIntent={selectedIntent}
+          onIntentSelect={handleIntentSelect}
+        />
+      )}
 
       <div className="relative mb-3">
         <i
-          className="ti ti-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
+          className="ti ti-search pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2"
           style={{ fontSize: 16, color: 'rgba(255,255,255,0.40)' }}
         />
         <input
+          ref={inputRef}
+          id="address-search-input"
           type="text"
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => {
-            if (inputValue.length > 0) setShowSuggestions(true)
+            if (inputValue.length > 0 && !placesReady) setShowSuggestions(true)
           }}
           onBlur={() => {
             setTimeout(() => setShowSuggestions(false), 150)
           }}
-          placeholder="Search area — e.g. Sholinganallur, Kovalam..."
+          placeholder="Enter address, project name or area..."
           className="w-full py-3 pl-10 pr-4 text-sm"
+          autoComplete="off"
         />
-        {showSuggestions && suggestions.length > 0 && (
+        {showAreaFallback && (
           <div
-            className="absolute z-10 mt-1 w-full overflow-hidden rounded-xl"
+            className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl"
             style={{
               background: '#0F2D1E',
               border: '0.5px solid rgba(255,255,255,0.15)',
@@ -319,10 +517,103 @@ export default function DecisionPanel({
       </div>
 
       <div className="w-full">
-        <MapPin onPinDrop={handlePinDrop} centerOn={mapCenter} />
+        <MapPin
+          onPinDrop={() => {}}
+          centerOn={mapCenter}
+          disablePinDrop
+        />
       </div>
 
-      {selectedArea && (
+      {outOfServiceArea && (
+        <div
+          style={{
+            background: 'rgba(186,117,23,0.10)',
+            border: '0.5px solid rgba(186,117,23,0.25)',
+            borderRadius: 16,
+            padding: '16px 20px',
+            marginTop: 12,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+            <i
+              className="ti ti-map-off"
+              style={{
+                fontSize: 20,
+                color: '#FAC775',
+                flexShrink: 0,
+                marginTop: 2,
+              }}
+            />
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#FAC775' }}>
+                Outside our current service area
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: 'rgba(250,199,117,0.70)',
+                  marginTop: 4,
+                  lineHeight: 1.6,
+                }}
+              >
+                We currently cover OMR and ECR corridors in Chennai.
+                <br />
+                <span style={{ color: '#FAC775', fontWeight: 500 }}>
+                  {outOfServiceAddress}
+                </span>{' '}
+                is not yet in our database.
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: 'rgba(93,202,165,0.80)',
+                  marginTop: 8,
+                }}
+              >
+                ✓ We&apos;ve noted your search. This area will be added soon.
+              </div>
+
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <button
+                  type="button"
+                  onClick={handleSearchAnotherArea}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 500,
+                    background: 'rgba(255,255,255,0.08)',
+                    color: 'rgba(255,255,255,0.60)',
+                    border: '0.5px solid rgba(255,255,255,0.15)',
+                    borderRadius: 8,
+                    padding: '7px 14px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Search another area
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleUseNearestArea}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 500,
+                    background: 'rgba(29,158,117,0.15)',
+                    color: '#5DCAA5',
+                    border: '0.5px solid rgba(29,158,117,0.30)',
+                    borderRadius: 8,
+                    padding: '7px 14px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Use nearest area instead →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedArea && !outOfServiceArea && (
         <div
           className="mt-3 flex items-center justify-between gap-3"
           style={{

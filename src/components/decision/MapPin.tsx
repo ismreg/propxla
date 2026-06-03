@@ -16,6 +16,7 @@ interface MapPinProps {
   onPinDrop: (lat: number, lng: number) => void
   existingAreas?: ExistingArea[]
   centerOn?: { lat: number; lng: number } | null
+  disablePinDrop?: boolean
 }
 
 function toSignalType(value: string): SignalType {
@@ -23,7 +24,12 @@ function toSignalType(value: string): SignalType {
   return 'warn'
 }
 
-export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null }: MapPinProps) {
+export default function MapPin({
+  onPinDrop,
+  existingAreas = [],
+  centerOn = null,
+  disablePinDrop = false,
+}: MapPinProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
   const userMarkerRef = useRef<MapboxMarker | null>(null)
@@ -73,6 +79,8 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
       resizeObserver.observe(container)
 
       map.on('click', (e) => {
+        if (disablePinDrop) return
+
         userMarkerRef.current?.remove()
 
         userMarkerRef.current = new mapboxgl.Marker({ color: '#1D9E75' })
@@ -95,7 +103,7 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
       mapRef.current?.remove()
       mapRef.current = null
     }
-  }, [])
+  }, [disablePinDrop])
 
   useEffect(() => {
     if (loading) return
@@ -128,10 +136,14 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
       areaMarkerRef.current = new mapboxgl.Marker({ element: el })
         .setLngLat([centerOn.lng, centerOn.lat])
         .addTo(map)
+
+      if (disablePinDrop) {
+        setPinSet(true)
+      }
     }
 
     centerMap()
-  }, [centerOn, loading])
+  }, [centerOn, loading, disablePinDrop])
 
   useEffect(() => {
     if (loading || !mapRef.current) return
@@ -195,6 +207,7 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
             width: '100%',
             height: '240px',
             borderRadius: 16,
+            cursor: disablePinDrop ? 'default' : 'crosshair',
           }}
         />
         {!loading && (
@@ -208,18 +221,20 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
               color: 'rgba(255,255,255,0.60)',
             }}
           >
-            <span className="flex items-center gap-1">
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
-                  backgroundColor: '#1D9E75',
-                }}
-              />
-              Your pin
-            </span>
+            {!disablePinDrop && (
+              <span className="flex items-center gap-1">
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    backgroundColor: '#1D9E75',
+                  }}
+                />
+                Your pin
+              </span>
+            )}
             <span className="flex items-center gap-1">
               <span
                 style={{
@@ -254,26 +269,30 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
                   backgroundColor: '#185FA5',
                 }}
               />
-              Sea / coastline
+              Selected location
             </span>
           </div>
         )}
       </div>
       <div className="flex items-center justify-between px-1 py-2">
         <span className="text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>
-          {pinSet
+          {disablePinDrop
+            ? 'Map view — search an address above'
+            : pinSet
             ? 'Pin set · click to reposition'
             : 'Click map to pin your property location'}
         </span>
-        <button
-          type="button"
-          onClick={handleReset}
-          disabled={!pinSet}
-          className="text-xs disabled:opacity-40"
-          style={{ color: 'rgba(255,255,255,0.40)' }}
-        >
-          Reset
-        </button>
+        {!disablePinDrop && (
+          <button
+            type="button"
+            onClick={handleReset}
+            disabled={!pinSet}
+            className="text-xs disabled:opacity-40"
+            style={{ color: 'rgba(255,255,255,0.40)' }}
+          >
+            Reset
+          </button>
+        )}
       </div>
     </div>
   )
