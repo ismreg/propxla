@@ -34,7 +34,6 @@ export default function PropXLAApp({ areas }: PropXLAAppProps) {
     user,
     showAuthModal,
     setShowAuthModal,
-    trackReport,
     signInWithGoogle,
     signOut,
   } = useAuth()
@@ -75,7 +74,6 @@ export default function PropXLAApp({ areas }: PropXLAAppProps) {
         <DecisionPanel
           areas={areas}
           initialSlug={selectedSlug}
-          onReportView={trackReport}
           onIntentSelect={(intent) => {
             logSearch({ area_slug: selectedSlug ?? undefined, intent })
           }}

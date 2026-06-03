@@ -2,23 +2,41 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getAreaBySlug } from '@/lib/data'
 import { getBrokerGap } from '@/lib/scoring'
-import PropertyReport from '@/components/decision/PropertyReport'
+import { INTENTS } from '@/lib/constants'
+import type { Intent } from '@/lib/types'
+import ReportPageClient from './ReportPageClient'
 
 interface ReportPageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ intent?: string }>
 }
 
-export async function generateMetadata({ params }: ReportPageProps): Promise<Metadata> {
+const VALID_INTENTS: Intent[] = ['retirement', 'investment', 'vacation', 'rental']
+
+function parseIntent(intentParam: string | undefined): Intent {
+  if (intentParam && VALID_INTENTS.includes(intentParam as Intent)) {
+    return intentParam as Intent
+  }
+  return 'investment'
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: ReportPageProps): Promise<Metadata> {
   const { slug } = await params
+  const { intent: intentParam } = await searchParams
   const area = await getAreaBySlug(slug)
 
   if (!area) {
     return { title: 'Report not found · PropXLA' }
   }
 
+  const intent = parseIntent(intentParam)
+  const intentLabel = INTENTS[intent]?.label ?? intent
   const gap = getBrokerGap(area)
   const title = `${area.name} Property Report · PropXLA`
-  const description = `${area.name} scored ${area.overall_score}/100. Broker quoting ${gap}% above registered prices. Check flood risk and CRZ status.`
+  const description = `${area.name} scored ${area.overall_score}/100 for ${intentLabel.toLowerCase()}. Broker quoting ${gap}% above registered prices. Check flood risk and CRZ status.`
 
   return {
     title,
@@ -26,7 +44,7 @@ export async function generateMetadata({ params }: ReportPageProps): Promise<Met
     openGraph: {
       title,
       description,
-      url: `https://propxla.com/report/${slug}`,
+      url: `https://propxla.com/report/${slug}?intent=${intent}`,
     },
     twitter: {
       card: 'summary_large_image',
@@ -34,34 +52,16 @@ export async function generateMetadata({ params }: ReportPageProps): Promise<Met
   }
 }
 
-export default async function ReportPage({ params }: ReportPageProps) {
+export default async function ReportPage({ params, searchParams }: ReportPageProps) {
   const { slug } = await params
+  const { intent: intentParam } = await searchParams
   const area = await getAreaBySlug(slug)
 
   if (!area) {
     notFound()
   }
 
-  return (
-    <div className="relative z-10 mx-auto min-h-screen max-w-2xl px-4 py-6">
-      <div className="glow-orb-1" />
-      <div className="glow-orb-2" />
-      <a
-        href="/"
-        className="mb-4 flex items-center gap-1 text-xs hover:opacity-80"
-        style={{ color: 'rgba(255,255,255,0.40)' }}
-      >
-        <i className="ti ti-arrow-left" />
-        Back to PropXLA
-      </a>
-      <h1 className="mb-1 text-lg font-medium text-white">
-        {area.name} · Property Intelligence Report
-      </h1>
-      <p className="mb-4 text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>
-        Default scoring for investment intent. Visit PropXLA to change intent and
-        recalculate.
-      </p>
-      <PropertyReport area={area} intent="investment" address={area.name} />
-    </div>
-  )
+  const intent = parseIntent(intentParam)
+
+  return <ReportPageClient area={area} intent={intent} />
 }

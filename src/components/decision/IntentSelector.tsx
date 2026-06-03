@@ -11,7 +11,7 @@ export default function IntentSelector({ selectedIntent, onIntentSelect }: Inten
   return (
     <div>
       <div className="mb-2 text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>
-        What are you buying this for?
+        What are you buying for?
       </div>
       <div className="grid grid-cols-4 gap-2">
         {(Object.keys(INTENTS) as (keyof typeof INTENTS)[]).map((key) => {

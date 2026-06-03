@@ -1,17 +1,24 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import type { Area } from '@/lib/types'
 import IntentSelector from '@/components/decision/IntentSelector'
-import PropertyReport from '@/components/decision/PropertyReport'
 
 const MapPin = dynamic(
   () => import('@/components/decision/MapPin'),
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-60 items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-400">
+      <div
+        className="flex h-60 w-full items-center justify-center rounded-xl text-xs"
+        style={{
+          background: 'rgba(255,255,255,0.06)',
+          border: '0.5px solid rgba(255,255,255,0.10)',
+          color: 'rgba(255,255,255,0.35)',
+        }}
+      >
         Loading map...
       </div>
     ),
@@ -22,7 +29,6 @@ interface DecisionPanelProps {
   areas: Area[]
   initialSlug?: string | null
   onIntentSelect?: (intent: string) => void
-  onReportView?: () => boolean
 }
 
 const AREA_COORDINATES: Record<string, [number, number]> = {
@@ -44,26 +50,26 @@ function findAreaBySlug(areas: Area[], slug: string | null | undefined): Area | 
 }
 
 const STEPS = [
-  { number: 1, label: 'Pin location', icon: 'ti-map-pin' },
-  { number: 2, label: 'Select intent', icon: 'ti-target' },
+  { number: 1, label: 'Select intent', icon: 'ti-target' },
+  { number: 2, label: 'Pin location', icon: 'ti-map-pin' },
   { number: 3, label: 'View report', icon: 'ti-file-analytics' },
 ] as const
 
 function getStepStatus(
   step: 1 | 2 | 3,
-  pinDropped: boolean,
-  selectedIntent: string | null
+  selectedIntent: string | null,
+  selectedArea: Area | null
 ): 'active' | 'completed' | 'inactive' {
   if (step === 1) {
-    if (!pinDropped) return 'active'
-    return 'completed'
-  }
-  if (step === 2) {
-    if (!pinDropped) return 'inactive'
     if (!selectedIntent) return 'active'
     return 'completed'
   }
-  if (!pinDropped || !selectedIntent) return 'inactive'
+  if (step === 2) {
+    if (!selectedIntent) return 'inactive'
+    if (!selectedArea) return 'active'
+    return 'completed'
+  }
+  if (!selectedIntent || !selectedArea) return 'inactive'
   return 'active'
 }
 
@@ -71,18 +77,18 @@ export default function DecisionPanel({
   areas,
   initialSlug = null,
   onIntentSelect,
-  onReportView,
 }: DecisionPanelProps) {
+  const router = useRouter()
   const initialArea = findAreaBySlug(areas, initialSlug)
 
   const [inputValue, setInputValue] = useState(initialArea?.name ?? '')
   const [suggestions, setSuggestions] = useState<Area[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [selectedIntent, setSelectedIntent] = useState<string | null>(null)
-  const [pinDropped, setPinDropped] = useState(!!initialSlug)
   const [selectedArea, setSelectedArea] = useState<Area | null>(initialArea)
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null)
-  const [canShowReport, setCanShowReport] = useState(false)
+
+  const reportReady = Boolean(selectedIntent && selectedArea)
 
   function flyToArea(slug: string) {
     const coords = AREA_COORDINATES[slug]
@@ -97,7 +103,6 @@ export default function DecisionPanel({
     if (area) {
       setSelectedArea(area)
       setInputValue(area.name)
-      setPinDropped(true)
       flyToArea(initialSlug)
     }
   }, [initialSlug, areas])
@@ -114,13 +119,11 @@ export default function DecisionPanel({
   function selectArea(area: Area) {
     setInputValue(area.name)
     setSelectedArea(area)
-    setPinDropped(true)
     setShowSuggestions(false)
     flyToArea(area.slug)
   }
 
   function handlePinDrop(_lat: number, _lng: number) {
-    setPinDropped(true)
     setSelectedArea((current) => current ?? areas[0] ?? null)
   }
 
@@ -129,33 +132,20 @@ export default function DecisionPanel({
     onIntentSelect?.(intent)
   }
 
-  function handleChangeArea() {
-    setSelectedArea(null)
-    setInputValue('')
-    setPinDropped(false)
-    setMapCenter(null)
-    setSuggestions([])
-    setShowSuggestions(false)
+  function handleGenerateReport() {
+    if (!selectedArea) return
+    const intent = selectedIntent || 'investment'
+    router.push(`/report/${selectedArea.slug}?intent=${intent}`)
   }
-
-  const showNotFound = pinDropped && selectedIntent && !selectedArea
-
-  useEffect(() => {
-    if (!pinDropped || !selectedIntent || !selectedArea) {
-      setCanShowReport(false)
-      return
-    }
-    const allowed = onReportView ? onReportView() : true
-    setCanShowReport(allowed)
-  }, [pinDropped, selectedIntent, selectedArea?.slug, onReportView, selectedArea])
 
   return (
     <div className="flex flex-col gap-4">
       <div className="mb-4 flex items-start">
         {STEPS.map((step, index) => {
-          const status = getStepStatus(step.number, pinDropped, selectedIntent)
+          const status = getStepStatus(step.number, selectedIntent, selectedArea)
           const stepLabel =
-            step.number === 1 && selectedArea ? selectedArea.name : step.label
+            step.number === 2 && selectedArea ? selectedArea.name : step.label
+          const isStep3Clickable = step.number === 3 && reportReady
 
           return (
             <div key={step.number} className="contents">
@@ -165,9 +155,29 @@ export default function DecisionPanel({
                   style={{ background: 'rgba(255,255,255,0.10)' }}
                 />
               )}
-              <div className="flex flex-col items-center gap-1">
+              <div
+                className={`flex flex-col items-center gap-1 rounded-lg px-1 transition-colors ${
+                  isStep3Clickable
+                    ? 'cursor-pointer hover:bg-[rgba(29,158,117,0.12)]'
+                    : ''
+                }`}
+                onClick={isStep3Clickable ? handleGenerateReport : undefined}
+                onKeyDown={
+                  isStep3Clickable
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleGenerateReport()
+                        }
+                      }
+                    : undefined
+                }
+                role={isStep3Clickable ? 'button' : undefined}
+                tabIndex={isStep3Clickable ? 0 : undefined}
+                style={isStep3Clickable ? { cursor: 'pointer' } : undefined}
+              >
                 <div
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors"
                   style={
                     status === 'active'
                       ? { backgroundColor: '#1D9E75', color: '#FFFFFF' }
@@ -217,6 +227,11 @@ export default function DecisionPanel({
           )
         })}
       </div>
+
+      <IntentSelector
+        selectedIntent={selectedIntent}
+        onIntentSelect={handleIntentSelect}
+      />
 
       <div className="relative mb-3">
         <i
@@ -292,56 +307,56 @@ export default function DecisionPanel({
         <MapPin onPinDrop={handlePinDrop} centerOn={mapCenter} />
       </div>
 
-      {selectedArea && pinDropped && (
+      {selectedArea && (
         <div
-          className="mb-3 flex items-center gap-3 rounded-xl px-4 py-3"
+          className="mt-3 flex items-center justify-between gap-3"
           style={{
-            background: 'rgba(29,158,117,0.15)',
-            border: '0.5px solid rgba(29,158,117,0.30)',
+            background: 'rgba(255,255,255,0.06)',
+            border: '0.5px solid rgba(255,255,255,0.10)',
+            borderRadius: 16,
+            padding: '14px 16px',
           }}
         >
-          <i className="ti ti-circle-check text-lg text-[#0F6E56]" />
-          <div className="flex-1">
-            <div className="text-sm font-semibold text-[#5DCAA5]">
-              {selectedArea.name} selected
+          <div className="flex min-w-0 items-center gap-3">
+            <div
+              className="flex flex-shrink-0 items-center justify-center rounded-full"
+              style={{
+                width: 36,
+                height: 36,
+                background: 'rgba(29,158,117,0.20)',
+              }}
+            >
+              <i className="ti ti-check" style={{ fontSize: 16, color: '#1D9E75' }} />
             </div>
-            <div className="mt-0.5 text-xs text-[#9FE1CB]">
-              {selectedArea.corridor.toUpperCase()} corridor · Overall score:{' '}
-              {selectedArea.overall_score}/100
+            <div className="min-w-0">
+              <div className="text-[15px] font-semibold text-white">{selectedArea.name}</div>
+              <div
+                className="mt-0.5 text-[11px]"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {selectedArea.corridor.toUpperCase()} corridor · Score:{' '}
+                {selectedArea.overall_score}/100
+              </div>
             </div>
           </div>
           <button
             type="button"
-            onClick={handleChangeArea}
-            className="flex-shrink-0 text-xs text-[#5DCAA5] underline hover:text-[#9FE1CB]"
+            onClick={handleGenerateReport}
+            disabled={!reportReady}
+            className="flex-shrink-0 whitespace-nowrap transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            style={{
+              background: 'linear-gradient(135deg, #F97316, #EA580C)',
+              color: 'white',
+              fontSize: 13,
+              fontWeight: 600,
+              padding: '10px 20px',
+              borderRadius: 10,
+              border: 'none',
+              boxShadow: '0 4px 12px rgba(249,115,22,0.30)',
+            }}
           >
-            Change
+            Generate Report
           </button>
-        </div>
-      )}
-
-      {pinDropped && (
-        <IntentSelector
-          selectedIntent={selectedIntent}
-          onIntentSelect={handleIntentSelect}
-        />
-      )}
-
-      {canShowReport && selectedArea && selectedIntent && (
-        <PropertyReport
-          area={selectedArea}
-          intent={selectedIntent}
-          address={inputValue}
-        />
-      )}
-
-      {showNotFound && (
-        <div
-          className="py-4 text-center text-sm"
-          style={{ color: 'rgba(255,255,255,0.40)' }}
-        >
-          Area not found in our database yet. Try searching Sholinganallur,
-          Kelambakkam, or other OMR/ECR areas.
         </div>
       )}
     </div>
