@@ -24,11 +24,17 @@ async function logSearch(data: {
 
 interface PropXLAAppProps {
   areas: Area[]
+  initialAreaSlug?: string | null
 }
 
-export default function PropXLAApp({ areas }: PropXLAAppProps) {
-  const [activeTab, setActiveTab] = useState<'disc' | 'dec'>('disc')
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
+export default function PropXLAApp({ areas, initialAreaSlug = null }: PropXLAAppProps) {
+  const hasInitialArea = Boolean(
+    initialAreaSlug && areas.some((area) => area.slug === initialAreaSlug)
+  )
+  const [activeTab, setActiveTab] = useState<'disc' | 'dec'>(hasInitialArea ? 'dec' : 'disc')
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(
+    hasInitialArea ? initialAreaSlug : null
+  )
 
   const { showAuthModal, setShowAuthModal, signInWithGoogle } = useAuth()
 

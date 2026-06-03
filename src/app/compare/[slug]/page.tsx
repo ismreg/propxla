@@ -57,18 +57,25 @@ export async function generateMetadata({
   const intent = resolveIntent(intentParam)
   const score1 = computeScore(area1, intent).overall
   const score2 = computeScore(area2, intent).overall
-  const winnerName = score1 >= score2 ? area1.name : area2.name
 
-  const title = `${area1.name} vs ${area2.name} · PropNXT Compare`
-  const description = `${area1.name} (${score1}/100) vs ${area2.name} (${score2}/100) for ${intent}. ${winnerName} is the better pick.`
+  const title = `${area1.name} vs ${area2.name} Property Comparison Chennai 2024`
+  const description = `Compare ${area1.name} (${score1}/100) vs ${area2.name} (${score2}/100) for ${intent} in Chennai. Registered prices, flood risk, broker premium, and investment score compared side by side.`
 
   return {
     title,
     description,
+    keywords: [
+      `${area1.name} vs ${area2.name}`,
+      `${area1.name} vs ${area2.name} Chennai`,
+      `${area1.name} or ${area2.name} property investment`,
+      `compare property ${area1.name} ${area2.name}`,
+      `OMR property comparison Chennai`,
+      `best area buy property Chennai OMR`,
+    ],
     openGraph: {
-      title,
-      description,
-      url: `https://propxla.com/compare/${slug}?intent=${intent}`,
+      title: `${area1.name} vs ${area2.name} | PropNXT`,
+      description: `${area1.name} scores ${score1}/100 vs ${area2.name} scores ${score2}/100 for ${intent}`,
+      url: `https://propnxt.com/compare/${slug}`,
     },
     twitter: { card: 'summary_large_image' },
   }
