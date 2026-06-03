@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import AppShell from '@/components/layout/AppShell'
 import PropertyReport from '@/components/decision/PropertyReport'
@@ -13,8 +14,15 @@ interface ReportPageClientProps {
 
 export default function ReportPageClient({ area, intent }: ReportPageClientProps) {
   const router = useRouter()
+  const [canGoBack, setCanGoBack] = useState(false)
   const result = computeScore(area, intent)
   const gap = getBrokerGap(area)
+
+  useEffect(() => {
+    setCanGoBack(
+      typeof window !== 'undefined' && window.history.length > 1
+    )
+  }, [])
 
   function handleShare() {
     const url = window.location.href
@@ -45,7 +53,7 @@ export default function ReportPageClient({ area, intent }: ReportPageClientProps
     </div>
   )
 
-  const topBarLeft = (
+  const topBarLeft = canGoBack ? (
     <button
       type="button"
       onClick={() => router.back()}
@@ -63,6 +71,27 @@ export default function ReportPageClient({ area, intent }: ReportPageClientProps
       <i className="ti ti-arrow-left" style={{ fontSize: 14 }} />
       Back
     </button>
+  ) : (
+    <a
+      href="/"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        textDecoration: 'none',
+      }}
+    >
+      <span
+        style={{
+          fontSize: 15,
+          fontWeight: 700,
+          color: 'white',
+          letterSpacing: '-0.03em',
+        }}
+      >
+        Prop<span style={{ color: '#1D9E75' }}>XLA</span>
+      </span>
+    </a>
   )
 
   const topBarRight = (

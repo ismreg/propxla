@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Area } from '@/lib/types'
 import AreaCard from '@/components/discovery/AreaCard'
@@ -9,15 +9,30 @@ import { DISCOVERY_FILTERS } from '@/lib/constants'
 interface DiscoveryPanelProps {
   areas: Area[]
   onAreaSelect: (slug: string) => void
+  initialCompareSlug?: string | null
 }
 
-export default function DiscoveryPanel({ areas, onAreaSelect }: DiscoveryPanelProps) {
+export default function DiscoveryPanel({
+  areas,
+  onAreaSelect,
+  initialCompareSlug = null,
+}: DiscoveryPanelProps) {
   const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('omr-invest')
   const [searchQuery, setSearchQuery] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
   const [compareMode, setCompareMode] = useState(false)
   const [compareSelections, setCompareSelections] = useState<string[]>([])
+
+  useEffect(() => {
+    if (
+      initialCompareSlug &&
+      areas.some((area) => area.slug === initialCompareSlug)
+    ) {
+      setCompareMode(true)
+      setCompareSelections([initialCompareSlug])
+    }
+  }, [initialCompareSlug, areas])
 
   const filter = DISCOVERY_FILTERS.find((f) => f.key === activeFilter)
   const query = searchQuery.trim().toLowerCase()

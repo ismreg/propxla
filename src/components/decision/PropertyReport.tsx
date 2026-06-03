@@ -443,7 +443,139 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
         </div>
       </div>
 
-      {/* Section 6 — Share */}
+      {/* Section 6 — Explore CTAs */}
+      <div
+        style={{
+          background: 'rgba(255,255,255,0.05)',
+          border: '0.5px solid rgba(255,255,255,0.10)',
+          borderRadius: 20,
+          padding: '20px 20px',
+          marginBottom: 16,
+          marginTop: 8,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 13,
+            color: 'rgba(255,255,255,0.50)',
+            marginBottom: 14,
+            textAlign: 'center',
+          }}
+        >
+          Explore more on PropXLA
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <a
+            href="/"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'rgba(29,158,117,0.15)',
+              border: '0.5px solid rgba(29,158,117,0.30)',
+              borderRadius: 14,
+              padding: '14px 16px',
+              textDecoration: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>
+                Discover more areas
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: 'rgba(255,255,255,0.45)',
+                  marginTop: 2,
+                }}
+              >
+                Compare 25+ OMR & ECR localities
+              </div>
+            </div>
+            <i className="ti ti-arrow-right" style={{ color: '#5DCAA5', fontSize: 18 }} />
+          </a>
+
+          <a
+            href={`/?compare=${area.slug}`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'rgba(24,95,165,0.15)',
+              border: '0.5px solid rgba(24,95,165,0.30)',
+              borderRadius: 14,
+              padding: '14px 16px',
+              textDecoration: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>
+                Compare {area.name} with another area
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: 'rgba(255,255,255,0.45)',
+                  marginTop: 2,
+                }}
+              >
+                See which area wins for your intent
+              </div>
+            </div>
+            <i className="ti ti-arrows-diff" style={{ color: '#85B7EB', fontSize: 18 }} />
+          </a>
+
+          <a
+            href="/?tab=decision"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'rgba(255,255,255,0.06)',
+              border: '0.5px solid rgba(255,255,255,0.10)',
+              borderRadius: 14,
+              padding: '14px 16px',
+              textDecoration: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>
+                Check your specific property
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: 'rgba(255,255,255,0.45)',
+                  marginTop: 2,
+                }}
+              >
+                Enter your address for a personalised report
+              </div>
+            </div>
+            <i
+              className="ti ti-home-search"
+              style={{ color: 'rgba(255,255,255,0.50)', fontSize: 18 }}
+            />
+          </a>
+        </div>
+
+        <div
+          style={{
+            textAlign: 'center',
+            fontSize: 11,
+            color: 'rgba(255,255,255,0.20)',
+            marginTop: 14,
+          }}
+        >
+          PropXLA · Know before you buy · Free forever
+        </div>
+      </div>
+
+      {/* Section 7 — Share */}
       <ShareButtons url={shareUrl} message={shareMessage} />
     </div>
   )

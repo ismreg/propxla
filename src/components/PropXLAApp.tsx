@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Area } from '@/lib/types'
 import AppShell from '@/components/layout/AppShell'
 import TabBar from '@/components/layout/TabBar'
@@ -35,8 +35,25 @@ export default function PropXLAApp({ areas, initialAreaSlug = null }: PropXLAApp
   const [selectedSlug, setSelectedSlug] = useState<string | null>(
     hasInitialArea ? initialAreaSlug : null
   )
+  const [initialCompareSlug, setInitialCompareSlug] = useState<string | null>(null)
 
   const { showAuthModal, setShowAuthModal, signInWithGoogle } = useAuth()
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const compareSlug = params.get('compare')
+    const tab = params.get('tab')
+
+    if (compareSlug && areas.some((a) => a.slug === compareSlug)) {
+      setSelectedSlug(compareSlug)
+      setActiveTab('disc')
+      setInitialCompareSlug(compareSlug)
+    }
+
+    if (tab === 'decision') {
+      setActiveTab('dec')
+    }
+  }, [areas])
 
   function handleAreaSelect(slug: string) {
     const area = areas.find((a) => a.slug === slug)
@@ -54,7 +71,11 @@ export default function PropXLAApp({ areas, initialAreaSlug = null }: PropXLAApp
       <div style={{ paddingTop: '16px', paddingBottom: '40px' }}>
         <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
         {activeTab === 'disc' && (
-          <DiscoveryPanel areas={areas} onAreaSelect={handleAreaSelect} />
+          <DiscoveryPanel
+            areas={areas}
+            onAreaSelect={handleAreaSelect}
+            initialCompareSlug={initialCompareSlug}
+          />
         )}
         {activeTab === 'dec' && (
           <DecisionPanel
