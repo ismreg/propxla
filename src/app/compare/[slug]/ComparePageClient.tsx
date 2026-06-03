@@ -140,16 +140,26 @@ export default function ComparePageClient({
         </div>
 
         <div
-          className="my-4 text-center"
+          className="my-4"
           style={{
             background: 'rgba(29,158,117,0.12)',
             border: '0.5px solid rgba(29,158,117,0.30)',
             borderRadius: 16,
             padding: 16,
+            textAlign: 'center',
           }}
         >
-          <i className="ti ti-trophy" style={{ fontSize: 24, color: '#FAC775' }} />
-          <div className="mt-2 text-lg font-bold text-white">
+          <i
+            className="ti ti-trophy"
+            style={{
+              fontSize: 28,
+              color: '#FAC775',
+              display: 'block',
+              marginBottom: 8,
+            }}
+            aria-hidden="true"
+          />
+          <div className="text-lg font-bold text-white">
             {winnerArea.name} is the better pick
           </div>
           <p className="mt-1 text-[13px]" style={{ color: 'rgba(255,255,255,0.50)' }}>
