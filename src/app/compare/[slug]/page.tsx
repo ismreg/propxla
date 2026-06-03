@@ -75,7 +75,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${area1.name} vs ${area2.name} | PropNXT`,
       description: `${area1.name} scores ${score1}/100 vs ${area2.name} scores ${score2}/100 for ${intent}`,
-      url: `https://propnxt.com/compare/${slug}`,
+      url: `https://propxla.com/compare/${slug}`,
     },
     twitter: { card: 'summary_large_image' },
   }

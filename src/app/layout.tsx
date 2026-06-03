@@ -36,14 +36,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: 'https://propnxt.com',
+    url: 'https://propxla.com',
     siteName: 'PropNXT',
     title: 'PropNXT — Chennai Property Intelligence',
     description:
       'Real registered prices vs broker quotes. Flood risk. Investment scores. 25+ OMR & ECR localities.',
     images: [
       {
-        url: 'https://propnxt.com/og-image.png',
+        url: 'https://propxla.com/og-image.png',
         width: 1200,
         height: 630,
         alt: 'PropNXT Chennai Property Intelligence',
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'PropNXT — Chennai Property Intelligence',
     description: 'Real registered prices vs broker quotes for OMR & ECR Chennai.',
-    images: ['https://propnxt.com/og-image.png'],
+    images: ['https://propxla.com/og-image.png'],
   },
   robots: {
     index: true,

@@ -3,7 +3,7 @@ import { getAllAreas } from '@/lib/data'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const areas = await getAllAreas()
-  const baseUrl = 'https://propnxt.com'
+  const baseUrl = 'https://propxla.com'
 
   const staticPages: MetadataRoute.Sitemap = [
     {

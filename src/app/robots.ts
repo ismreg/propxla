@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: '/admin/',
     },
-    sitemap: 'https://propnxt.com/sitemap.xml',
+    sitemap: 'https://propxla.com/sitemap.xml',
   }
 }
