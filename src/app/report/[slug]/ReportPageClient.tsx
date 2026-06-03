@@ -76,7 +76,7 @@ export default function ReportPageClient({ area, intent }: ReportPageClientProps
         </button>
       </header>
 
-      <div className="mx-auto max-w-[640px]" style={{ padding: '16px 16px 40px' }}>
+      <div className="mx-auto max-w-2xl px-4 pb-20 pt-4 md:max-w-3xl md:px-8">
         <PropertyReport area={area} intent={intent} address={area.name} />
       </div>
     </div>
