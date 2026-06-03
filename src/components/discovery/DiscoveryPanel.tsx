@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { Area } from '@/lib/types'
 import AreaCard from '@/components/discovery/AreaCard'
 import { DISCOVERY_FILTERS } from '@/lib/constants'
@@ -11,9 +12,12 @@ interface DiscoveryPanelProps {
 }
 
 export default function DiscoveryPanel({ areas, onAreaSelect }: DiscoveryPanelProps) {
+  const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('omr-invest')
   const [searchQuery, setSearchQuery] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
+  const [compareMode, setCompareMode] = useState(false)
+  const [compareSelections, setCompareSelections] = useState<string[]>([])
 
   const filter = DISCOVERY_FILTERS.find((f) => f.key === activeFilter)
   const query = searchQuery.trim().toLowerCase()
@@ -22,6 +26,36 @@ export default function DiscoveryPanel({ areas, onAreaSelect }: DiscoveryPanelPr
     .filter((area) => (filter ? area.corridor === filter.corridor : true))
     .filter((area) => (query ? area.name.toLowerCase().includes(query) : true))
     .sort((a, b) => b.overall_score - a.overall_score)
+
+  const compareAreas = compareSelections
+    .map((slug) => areas.find((area) => area.slug === slug))
+    .filter((area): area is Area => area !== undefined)
+
+  function handleCompareToggle() {
+    if (compareMode) {
+      setCompareMode(false)
+      setCompareSelections([])
+      return
+    }
+    setCompareMode(true)
+  }
+
+  function handleCompareSelect(slug: string) {
+    setCompareSelections((prev) => {
+      if (prev.includes(slug)) return prev.filter((s) => s !== slug)
+      if (prev.length >= 2) return prev
+      return [...prev, slug]
+    })
+  }
+
+  function handleRemoveCompare(slug: string) {
+    setCompareSelections((prev) => prev.filter((s) => s !== slug))
+  }
+
+  function handleCompareNavigate() {
+    if (compareSelections.length !== 2) return
+    router.push(`/compare/${compareSelections[0]}-vs-${compareSelections[1]}`)
+  }
 
   return (
     <div>
@@ -126,17 +160,109 @@ export default function DiscoveryPanel({ areas, onAreaSelect }: DiscoveryPanelPr
       </div>
 
       <div
-        className="mb-2 flex items-center justify-between uppercase tracking-wide"
+        className="mb-2 flex items-center justify-between gap-2 uppercase tracking-wide"
         style={{
           fontSize: 11,
           color: 'rgba(255,255,255,0.35)',
         }}
       >
-        <span>Ranked areas</span>
         <span>
-          {filtered.length} {filtered.length === 1 ? 'area' : 'areas'}
+          Ranked areas · {filtered.length} {filtered.length === 1 ? 'area' : 'areas'}
         </span>
+        <button
+          type="button"
+          onClick={handleCompareToggle}
+          className="flex items-center gap-1.5 normal-case tracking-normal transition-opacity hover:opacity-90"
+          style={
+            compareMode
+              ? {
+                  fontSize: 12,
+                  background: 'rgba(29,158,117,0.20)',
+                  border: '0.5px solid rgba(29,158,117,0.40)',
+                  color: '#5DCAA5',
+                  padding: '5px 12px',
+                  borderRadius: 8,
+                }
+              : {
+                  fontSize: 12,
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '0.5px solid rgba(255,255,255,0.15)',
+                  color: 'rgba(255,255,255,0.60)',
+                  padding: '5px 12px',
+                  borderRadius: 8,
+                }
+          }
+        >
+          {!compareMode && <i className="ti ti-arrows-diff" />}
+          {compareMode ? 'Cancel compare' : 'Compare areas'}
+        </button>
       </div>
+
+      {compareMode && (
+        <div className="glass mb-3 rounded-xl" style={{ padding: '12px 14px' }}>
+          <div className="mb-2 text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>
+            Select 2 areas to compare
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {[0, 1].map((slot) => {
+              const area = compareAreas[slot]
+              if (!area) {
+                return (
+                  <div
+                    key={slot}
+                    className="rounded-lg p-2 text-center text-xs"
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '0.5px dashed rgba(255,255,255,0.15)',
+                      color: 'rgba(255,255,255,0.25)',
+                    }}
+                  >
+                    Pick an area below
+                  </div>
+                )
+              }
+              return (
+                <div
+                  key={slot}
+                  className="flex items-center justify-between rounded-lg p-2"
+                  style={{
+                    background: 'rgba(29,158,117,0.12)',
+                    border: '0.5px solid rgba(29,158,117,0.30)',
+                  }}
+                >
+                  <div>
+                    <div className="text-xs font-medium text-white">{area.name}</div>
+                    <div className="text-xs" style={{ color: '#5DCAA5' }}>
+                      {area.overall_score}/100
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCompare(area.slug)}
+                    className="text-gray-400 transition-colors hover:text-white"
+                    aria-label={`Remove ${area.name}`}
+                  >
+                    <i className="ti ti-x" style={{ fontSize: 14 }} />
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+          {compareSelections.length === 2 && compareAreas.length === 2 && (
+            <button
+              type="button"
+              onClick={handleCompareNavigate}
+              className="mt-2 w-full cursor-pointer rounded-xl py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{
+                background: 'linear-gradient(135deg, #1D9E75, #185FA5)',
+                border: 'none',
+              }}
+            >
+              Compare {compareAreas[0].name} vs {compareAreas[1].name} →
+            </button>
+          )}
+        </div>
+      )}
 
       {filtered.length === 0 ? (
         <div className="py-8 text-center text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
@@ -150,6 +276,14 @@ export default function DiscoveryPanel({ areas, onAreaSelect }: DiscoveryPanelPr
               area={area}
               rank={index + 1}
               onClick={onAreaSelect}
+              compareMode={compareMode}
+              isSelected={compareSelections.includes(area.slug)}
+              isDisabled={
+                compareMode &&
+                compareSelections.length === 2 &&
+                !compareSelections.includes(area.slug)
+              }
+              onCompareToggle={handleCompareSelect}
             />
           ))}
         </div>

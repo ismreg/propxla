@@ -8,6 +8,10 @@ interface AreaCardProps {
   area: Area
   rank: number
   onClick: (slug: string) => void
+  compareMode?: boolean
+  isSelected?: boolean
+  isDisabled?: boolean
+  onCompareToggle?: (slug: string) => void
 }
 
 function toSignalType(value: string): SignalType {
@@ -26,7 +30,15 @@ function verdictBadgeDark(type: SignalType) {
   return { bg: 'rgba(226,75,74,0.15)', color: '#F09595' }
 }
 
-export default function AreaCard({ area, rank, onClick }: AreaCardProps) {
+export default function AreaCard({
+  area,
+  rank,
+  onClick,
+  compareMode = false,
+  isSelected = false,
+  isDisabled = false,
+  onCompareToggle,
+}: AreaCardProps) {
   const gap = getBrokerGap(area)
   const verdict = getVerdict(area.overall_score)
   const verdictDark = verdictBadgeDark(verdict.type)
@@ -38,25 +50,59 @@ export default function AreaCard({ area, rank, onClick }: AreaCardProps) {
     { label: 'Price', type: toSignalType(area.growth_type) },
   ]
 
+  function handleClick() {
+    if (compareMode && onCompareToggle) {
+      if (!isDisabled) onCompareToggle(area.slug)
+      return
+    }
+    onClick(area.slug)
+  }
+
   return (
     <div
-      onClick={() => onClick(area.slug)}
-      className="flex cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 transition-colors"
+      onClick={handleClick}
+      className={`relative flex cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 transition-colors ${
+        compareMode && isDisabled ? 'opacity-40' : ''
+      }`}
       style={{
         background: 'rgba(255,255,255,0.07)',
-        border: '0.5px solid rgba(255,255,255,0.10)',
+        border: compareMode && isSelected
+          ? '0.5px solid rgba(29,158,117,0.50)'
+          : '0.5px solid rgba(255,255,255,0.10)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
       }}
       onMouseEnter={(e) => {
+        if (compareMode && isDisabled) return
         e.currentTarget.style.background = 'rgba(255,255,255,0.10)'
         e.currentTarget.style.borderColor = 'rgba(29,158,117,0.50)'
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)'
+        e.currentTarget.style.borderColor =
+          compareMode && isSelected
+            ? 'rgba(29,158,117,0.50)'
+            : 'rgba(255,255,255,0.10)'
       }}
     >
+      {compareMode && (
+        <div
+          className="absolute right-3 top-3 flex items-center justify-center"
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: '50%',
+            ...(isSelected
+              ? { background: 'rgba(29,158,117,0.30)', border: '0.5px solid #1D9E75' }
+              : {
+                  background: 'transparent',
+                  border: '0.5px dashed rgba(255,255,255,0.25)',
+                }),
+          }}
+        >
+          {isSelected && <i className="ti ti-check" style={{ fontSize: 11, color: '#5DCAA5' }} />}
+        </div>
+      )}
       <div
         className="flex flex-shrink-0 items-center justify-center text-xs font-medium"
         style={{
