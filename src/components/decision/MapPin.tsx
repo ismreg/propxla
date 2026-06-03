@@ -37,6 +37,7 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
 
   useEffect(() => {
     let cancelled = false
+    let resizeObserver: ResizeObserver | null = null
 
     async function initMap() {
       if (!mapContainerRef.current) return
@@ -48,8 +49,10 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
 
       mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
+      const container = mapContainerRef.current
+
       const map = new mapboxgl.Map({
-        container: mapContainerRef.current,
+        container,
         center: MAPBOX_CONFIG.center,
         zoom: MAPBOX_CONFIG.zoom,
         style: MAPBOX_CONFIG.style,
@@ -58,8 +61,16 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
       mapRef.current = map
 
       map.on('load', () => {
-        if (!cancelled) setLoading(false)
+        if (!cancelled) {
+          setLoading(false)
+          map.resize()
+        }
       })
+
+      resizeObserver = new ResizeObserver(() => {
+        map.resize()
+      })
+      resizeObserver.observe(container)
 
       map.on('click', (e) => {
         userMarkerRef.current?.remove()
@@ -77,6 +88,7 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
 
     return () => {
       cancelled = true
+      resizeObserver?.disconnect()
       userMarkerRef.current?.remove()
       areaMarkerRef.current?.remove()
       areaMarkersRef.current.forEach((marker) => marker.remove())
@@ -160,12 +172,14 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
   }
 
   return (
-    <div>
-      <div className="relative">
+    <div className="w-full">
+      <div className="relative w-full">
         {loading && (
           <div
-            className="absolute inset-0 z-10 flex h-[240px] items-center justify-center rounded-xl text-xs"
+            className="absolute inset-0 z-10 flex w-full items-center justify-center text-xs"
             style={{
+              height: '240px',
+              borderRadius: 16,
               background: 'rgba(255,255,255,0.06)',
               border: '0.5px solid rgba(255,255,255,0.10)',
               color: 'rgba(255,255,255,0.35)',
@@ -174,7 +188,15 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
             Loading map...
           </div>
         )}
-        <div ref={mapContainerRef} className="h-[240px] overflow-hidden rounded-xl" />
+        <div
+          ref={mapContainerRef}
+          className="w-full overflow-hidden"
+          style={{
+            width: '100%',
+            height: '240px',
+            borderRadius: 16,
+          }}
+        />
         {!loading && (
           <div
             className="absolute bottom-2 left-2 flex flex-col gap-1 rounded p-1.5 text-[10px]"

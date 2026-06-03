@@ -288,7 +288,9 @@ export default function DecisionPanel({
         )}
       </div>
 
-      <MapPin onPinDrop={handlePinDrop} centerOn={mapCenter} />
+      <div className="w-full">
+        <MapPin onPinDrop={handlePinDrop} centerOn={mapCenter} />
+      </div>
 
       {selectedArea && pinDropped && (
         <div
