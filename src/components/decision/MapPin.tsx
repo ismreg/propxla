@@ -15,6 +15,7 @@ interface ExistingArea {
 interface MapPinProps {
   onPinDrop: (lat: number, lng: number) => void
   existingAreas?: ExistingArea[]
+  centerOn?: { lat: number; lng: number } | null
 }
 
 function toSignalType(value: string): SignalType {
@@ -22,10 +23,11 @@ function toSignalType(value: string): SignalType {
   return 'warn'
 }
 
-export default function MapPin({ onPinDrop, existingAreas = [] }: MapPinProps) {
+export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null }: MapPinProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
   const userMarkerRef = useRef<MapboxMarker | null>(null)
+  const areaMarkerRef = useRef<MapboxMarker | null>(null)
   const areaMarkersRef = useRef<MapboxMarker[]>([])
   const onPinDropRef = useRef(onPinDrop)
   const [loading, setLoading] = useState(true)
@@ -76,11 +78,48 @@ export default function MapPin({ onPinDrop, existingAreas = [] }: MapPinProps) {
     return () => {
       cancelled = true
       userMarkerRef.current?.remove()
+      areaMarkerRef.current?.remove()
       areaMarkersRef.current.forEach((marker) => marker.remove())
       mapRef.current?.remove()
       mapRef.current = null
     }
   }, [])
+
+  useEffect(() => {
+    if (loading) return
+
+    async function centerMap() {
+      const map = mapRef.current
+      if (!map) return
+
+      if (!centerOn) {
+        areaMarkerRef.current?.remove()
+        areaMarkerRef.current = null
+        return
+      }
+
+      const mapboxgl = (await import('mapbox-gl')).default
+
+      map.flyTo({
+        center: [centerOn.lng, centerOn.lat],
+        zoom: 13,
+        duration: 1200,
+      })
+
+      areaMarkerRef.current?.remove()
+      const el = document.createElement('div')
+      el.style.cssText = `
+        width: 14px; height: 14px; border-radius: 50%;
+        background: #185FA5; border: 3px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      `
+      areaMarkerRef.current = new mapboxgl.Marker({ element: el })
+        .setLngLat([centerOn.lng, centerOn.lat])
+        .addTo(map)
+    }
+
+    centerMap()
+  }, [centerOn, loading])
 
   useEffect(() => {
     if (loading || !mapRef.current) return
