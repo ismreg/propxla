@@ -42,6 +42,21 @@ const AREA_COORDINATES: Record<string, [number, number]> = {
   muttukadu: [80.2500, 12.8167],
   kovalam: [80.2500, 12.7833],
   kuvathur: [80.2500, 12.6167],
+  medavakkam: [80.1954, 12.9174],
+  navalur: [80.2267, 12.8441],
+  padur: [80.2267, 12.8167],
+  karapakkam: [80.2267, 12.9000],
+  'okkiyam-thoraipakkam': [80.2456, 12.9456],
+  sozhanganallur: [80.2100, 12.8800],
+  guduvanchery: [80.0570, 12.8450],
+  vandalur: [80.0833, 12.8833],
+  palavakkam: [80.2600, 12.9950],
+  injambakkam: [80.2600, 12.9600],
+  akkarai: [80.2650, 12.9400],
+  uthandi: [80.2650, 12.9200],
+  kanathur: [80.2650, 12.8900],
+  mahabalipuram: [80.1928, 12.6167],
+  poonamallee: [80.1167, 13.0500],
 }
 
 function findAreaBySlug(areas: Area[], slug: string | null | undefined): Area | null {

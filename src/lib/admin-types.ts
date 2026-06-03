@@ -17,4 +17,6 @@ export interface ParsedAreaUpdate {
   price_trend?: PriceTrendPoint[]
   overall_score?: number
   growth_label?: string
+  sources?: string[]
+  auto_searched?: boolean
 }

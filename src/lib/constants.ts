@@ -1,4 +1,4 @@
-import type { DiscoveryFilter, FloodRisk, SignalType } from './types'
+import type { Corridor, DiscoveryFilter, FloodRisk, Intent, SignalType } from './types'
 
 // ============================================
 // CORRIDORS
@@ -29,6 +29,12 @@ export const DISCOVERY_FILTERS: DiscoveryFilter[] = [
   { key: 'ecr-retire',  label: 'ECR · Retirement', corridor: 'ecr', intent: 'retirement' },
   { key: 'ecr-villa',   label: 'ECR · Villa',       corridor: 'ecr', intent: 'vacation'   },
   { key: 'omr-rental',  label: 'OMR · Rental',      corridor: 'omr', intent: 'rental'     },
+  {
+    key: 'all-chennai',
+    label: 'All Chennai',
+    corridor: 'omr' as Corridor,
+    intent: 'investment' as Intent,
+  },
 ]
 
 // ============================================
@@ -71,8 +77,8 @@ export function getVerdict(score: number): {
 // ============================================
 
 export const MAPBOX_CONFIG = {
-  center: [80.26, 12.85] as [number, number],
-  zoom: 10.5,
+  center: [80.18, 12.88] as [number, number],
+  zoom: 9.5,
   style: 'mapbox://styles/mapbox/dark-v11',
 }
 
