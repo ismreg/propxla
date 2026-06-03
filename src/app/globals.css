@@ -1,26 +1,88 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --propxla-bg-start: #0F2419;
+  --propxla-bg-mid: #0A3D2B;
+  --propxla-bg-end: #0C2F3F;
+  --propxla-glass: rgba(255,255,255,0.07);
+  --propxla-glass-border: rgba(255,255,255,0.10);
+  --propxla-glass-high: rgba(255,255,255,0.10);
+  --propxla-glass-high-border: rgba(255,255,255,0.15);
+  --propxla-teal: #1D9E75;
+  --propxla-teal-light: #5DCAA5;
+  --propxla-teal-pale: rgba(29,158,117,0.12);
+  --propxla-teal-border: rgba(29,158,117,0.30);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #0F2419 0%, #0A3D2B 40%, #0C2F3F 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: white;
+}
+
+input, textarea, select {
+  background: rgba(255,255,255,0.08) !important;
+  border: 0.5px solid rgba(255,255,255,0.15) !important;
+  color: white !important;
+  border-radius: 12px !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: rgba(255,255,255,0.30) !important;
+}
+
+input:focus, textarea:focus {
+  outline: none !important;
+  border-color: rgba(29,158,117,0.60) !important;
+  box-shadow: 0 0 0 3px rgba(29,158,117,0.12) !important;
+}
+
+.glass {
+  background: rgba(255,255,255,0.07);
+  border: 0.5px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-high {
+  background: rgba(255,255,255,0.10);
+  border: 0.5px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-teal {
+  background: rgba(29,158,117,0.12);
+  border: 0.5px solid rgba(29,158,117,0.30);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-orb-1 {
+  position: fixed;
+  top: -100px;
+  right: -80px;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(29,158,117,0.20) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-orb-2 {
+  position: fixed;
+  bottom: 100px;
+  left: -100px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(24,95,165,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
 }

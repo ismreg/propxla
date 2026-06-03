@@ -73,7 +73,7 @@ export function getVerdict(score: number): {
 export const MAPBOX_CONFIG = {
   center: [80.26, 12.85] as [number, number],
   zoom: 10.5,
-  style: 'mapbox://styles/mapbox/light-v11',
+  style: 'mapbox://styles/mapbox/dark-v11',
 }
 
 // ============================================

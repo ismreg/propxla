@@ -6,9 +6,27 @@ interface FlagCardProps {
 }
 
 const TYPES = {
-  danger: { bg: '#FCEBEB', border: '#F7C1C1', title: '#791F1F', body: '#A32D2D' },
-  warn:   { bg: '#FAEEDA', border: '#FAC775', title: '#633806', body: '#854F0B' },
-  good:   { bg: '#EAF3DE', border: '#C0DD97', title: '#27500A', body: '#3B6D11' },
+  danger: {
+    bg: 'rgba(226,75,74,0.10)',
+    border: 'rgba(226,75,74,0.25)',
+    title: '#F09595',
+    body: 'rgba(240,149,149,0.70)',
+    iconBg: 'rgba(226,75,74,0.15)',
+  },
+  warn: {
+    bg: 'rgba(186,117,23,0.10)',
+    border: 'rgba(186,117,23,0.25)',
+    title: '#FAC775',
+    body: 'rgba(250,199,117,0.70)',
+    iconBg: 'rgba(186,117,23,0.15)',
+  },
+  good: {
+    bg: 'rgba(29,158,117,0.10)',
+    border: 'rgba(29,158,117,0.25)',
+    title: '#5DCAA5',
+    body: 'rgba(93,202,165,0.70)',
+    iconBg: 'rgba(29,158,117,0.15)',
+  },
 } as const
 
 export default function FlagCard({ type, icon, title, body }: FlagCardProps) {

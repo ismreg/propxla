@@ -163,13 +163,29 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
     <div>
       <div className="relative">
         {loading && (
-          <div className="absolute inset-0 z-10 flex h-[240px] items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-400">
+          <div
+            className="absolute inset-0 z-10 flex h-[240px] items-center justify-center rounded-xl text-xs"
+            style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: '0.5px solid rgba(255,255,255,0.10)',
+              color: 'rgba(255,255,255,0.35)',
+            }}
+          >
             Loading map...
           </div>
         )}
         <div ref={mapContainerRef} className="h-[240px] overflow-hidden rounded-xl" />
         {!loading && (
-          <div className="absolute bottom-2 left-2 flex flex-col gap-1 rounded bg-white p-1.5 text-[10px] shadow-sm">
+          <div
+            className="absolute bottom-2 left-2 flex flex-col gap-1 rounded p-1.5 text-[10px]"
+            style={{
+              background: 'rgba(15,36,25,0.85)',
+              border: '0.5px solid rgba(255,255,255,0.15)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              color: 'rgba(255,255,255,0.60)',
+            }}
+          >
             <span className="flex items-center gap-1">
               <span
                 style={{
@@ -222,7 +238,7 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
         )}
       </div>
       <div className="flex items-center justify-between px-1 py-2">
-        <span className="text-xs text-gray-400">
+        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>
           {pinSet
             ? 'Pin set · click to reposition'
             : 'Click map to pin your property location'}
@@ -231,7 +247,8 @@ export default function MapPin({ onPinDrop, existingAreas = [], centerOn = null 
           type="button"
           onClick={handleReset}
           disabled={!pinSet}
-          className="text-xs text-gray-500 disabled:opacity-40"
+          className="text-xs disabled:opacity-40"
+          style={{ color: 'rgba(255,255,255,0.40)' }}
         >
           Reset
         </button>

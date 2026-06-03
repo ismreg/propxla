@@ -25,15 +25,20 @@ export default function ShareButtons({ url, message, label = 'Share report' }: S
         href={whatsappHref}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex-1 py-2 text-sm font-medium border border-gray-200 rounded-lg bg-white hover:bg-gray-50 flex items-center justify-center gap-2"
+        className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-opacity hover:opacity-85"
+        style={{ background: '#25D366', border: 'none' }}
       >
-        <i className="ti ti-brand-whatsapp" style={{ color: '#25D366' }} />
+        <i className="ti ti-brand-whatsapp" />
         {label}
       </a>
       <button
         type="button"
         onClick={handleCopy}
-        className="flex-1 py-2 text-sm font-medium border border-gray-200 rounded-lg bg-white hover:bg-gray-50 flex items-center justify-center gap-2"
+        className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-white transition-opacity hover:opacity-85"
+        style={{
+          background: 'rgba(255,255,255,0.10)',
+          border: '0.5px solid rgba(255,255,255,0.15)',
+        }}
       >
         <i className={`ti ${copied ? 'ti-check' : 'ti-copy'}`} />
         {copied ? 'Copied!' : 'Copy link'}

@@ -10,7 +10,7 @@ interface IntentSelectorProps {
 export default function IntentSelector({ selectedIntent, onIntentSelect }: IntentSelectorProps) {
   return (
     <div>
-      <div className="text-xs text-gray-400 mb-2">
+      <div className="mb-2 text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>
         What are you buying this for?
       </div>
       <div className="grid grid-cols-4 gap-2">
@@ -22,20 +22,33 @@ export default function IntentSelector({ selectedIntent, onIntentSelect }: Inten
             <div
               key={key}
               onClick={() => onIntentSelect(key)}
-              className={`p-3 border rounded-xl cursor-pointer text-center transition-colors ${
-                isSelected ? '' : 'bg-white border-gray-200'
-              }`}
+              className="cursor-pointer rounded-xl p-3 text-center transition-colors"
               style={
                 isSelected
-                  ? { backgroundColor: '#E1F5EE', borderColor: '#5DCAA5', color: '#0F6E56' }
-                  : undefined
+                  ? {
+                      background: 'rgba(29,158,117,0.20)',
+                      border: '0.5px solid #1D9E75',
+                    }
+                  : {
+                      background: 'rgba(255,255,255,0.07)',
+                      border: '0.5px solid rgba(255,255,255,0.10)',
+                    }
               }
             >
               <i
-                className={`ti ${intent.icon} mb-1 ${isSelected ? '' : 'text-gray-400'}`}
-                style={{ fontSize: 18, display: 'block' }}
+                className={`ti ${intent.icon} mb-1`}
+                style={{
+                  fontSize: 18,
+                  display: 'block',
+                  color: isSelected ? '#5DCAA5' : 'rgba(255,255,255,0.35)',
+                }}
               />
-              <span className={`text-xs ${isSelected ? '' : 'text-gray-500'}`}>
+              <span
+                className="text-xs"
+                style={{
+                  color: isSelected ? '#5DCAA5' : 'rgba(255,255,255,0.40)',
+                }}
+              >
                 {intent.label}
               </span>
             </div>

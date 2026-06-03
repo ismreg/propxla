@@ -159,18 +159,24 @@ export default function DecisionPanel({
 
           return (
             <div key={step.number} className="contents">
-              {index > 0 && <div className="mx-2 mt-3 h-px flex-1 bg-gray-200" />}
+              {index > 0 && (
+                <div
+                  className="mx-2 mt-3 h-px flex-1"
+                  style={{ background: 'rgba(255,255,255,0.10)' }}
+                />
+              )}
               <div className="flex flex-col items-center gap-1">
                 <div
-                  className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium ${
-                    status === 'inactive' ? 'bg-gray-100 text-gray-400' : ''
-                  }`}
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium"
                   style={
                     status === 'active'
-                      ? { backgroundColor: '#E1F5EE', color: '#0F6E56' }
+                      ? { backgroundColor: '#1D9E75', color: '#FFFFFF' }
                       : status === 'completed'
-                      ? { backgroundColor: '#EAF3DE', color: '#3B6D11' }
-                      : undefined
+                      ? { backgroundColor: 'rgba(29,158,117,0.20)', color: '#5DCAA5' }
+                      : {
+                          backgroundColor: 'rgba(255,255,255,0.08)',
+                          color: 'rgba(255,255,255,0.35)',
+                        }
                   }
                 >
                   {status === 'completed' ? (
@@ -181,28 +187,27 @@ export default function DecisionPanel({
                 </div>
                 <div className="flex flex-col items-center gap-0.5">
                   <i
-                    className={`ti ${step.icon} ${
-                      status === 'inactive' ? 'text-gray-400' : ''
-                    }`}
-                    style={
-                      status === 'active'
-                        ? { color: '#0F6E56', fontSize: 14 }
-                        : status === 'completed'
-                        ? { color: '#3B6D11', fontSize: 14 }
-                        : { fontSize: 14 }
-                    }
+                    className={`ti ${step.icon}`}
+                    style={{
+                      fontSize: 14,
+                      color:
+                        status === 'active'
+                          ? '#5DCAA5'
+                          : status === 'completed'
+                          ? '#5DCAA5'
+                          : 'rgba(255,255,255,0.35)',
+                    }}
                   />
                   <span
-                    className={`max-w-[72px] truncate text-center text-[10px] ${
-                      status === 'inactive' ? 'text-gray-400' : ''
-                    }`}
-                    style={
-                      status === 'active'
-                        ? { color: '#0F6E56' }
-                        : status === 'completed'
-                        ? { color: '#3B6D11' }
-                        : undefined
-                    }
+                    className="max-w-[72px] truncate text-center text-[10px]"
+                    style={{
+                      color:
+                        status === 'active'
+                          ? '#FFFFFF'
+                          : status === 'completed'
+                          ? '#5DCAA5'
+                          : 'rgba(255,255,255,0.35)',
+                    }}
                   >
                     {stepLabel}
                   </span>
@@ -215,8 +220,8 @@ export default function DecisionPanel({
 
       <div className="relative mb-3">
         <i
-          className="ti ti-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          style={{ fontSize: 16 }}
+          className="ti ti-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
+          style={{ fontSize: 16, color: 'rgba(255,255,255,0.40)' }}
         />
         <input
           type="text"
@@ -229,17 +234,31 @@ export default function DecisionPanel({
             setTimeout(() => setShowSuggestions(false), 150)
           }}
           placeholder="Search area — e.g. Sholinganallur, Kovalam..."
-          className="w-full rounded-xl border border-[#E8E6E1] bg-white py-3 pl-10 pr-4 text-sm"
+          className="w-full py-3 pl-10 pr-4 text-sm"
         />
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-xl border border-[#E8E6E1] bg-white shadow-lg">
+          <div
+            className="absolute z-10 mt-1 w-full overflow-hidden rounded-xl"
+            style={{
+              background: '#0F2D1E',
+              border: '0.5px solid rgba(255,255,255,0.15)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+            }}
+          >
             {suggestions.map((area) => (
               <button
                 key={area.slug}
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => selectArea(area)}
-                className="flex w-full cursor-pointer items-center gap-3 border-b border-[#F7F6F3] px-4 py-3 text-left last:border-0 hover:bg-[#F7F6F3]"
+                className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left last:border-0"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }}
               >
                 <span
                   className="h-2 w-2 flex-shrink-0 rounded-full"
@@ -248,17 +267,18 @@ export default function DecisionPanel({
                   }}
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium text-gray-800">{area.name}</div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-sm font-medium text-white">{area.name}</div>
+                  <div className="text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>
                     {area.corridor.toUpperCase()} · {area.distance_from_city} km from city
                   </div>
                 </div>
                 <span
-                  className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                  className="flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold"
+                  style={
                     area.overall_score >= 65
-                      ? 'bg-[#E1F5EE] text-[#0F6E56]'
-                      : 'bg-[#FAEEDA] text-[#854F0B]'
-                  }`}
+                      ? { background: 'rgba(29,158,117,0.20)', color: '#5DCAA5' }
+                      : { background: 'rgba(186,117,23,0.15)', color: '#FAC775' }
+                  }
                 >
                   {area.overall_score}
                 </span>
@@ -271,13 +291,19 @@ export default function DecisionPanel({
       <MapPin onPinDrop={handlePinDrop} centerOn={mapCenter} />
 
       {selectedArea && pinDropped && (
-        <div className="mb-3 flex items-center gap-3 rounded-xl border border-[#9FE1CB] bg-[#E1F5EE] px-4 py-3">
+        <div
+          className="mb-3 flex items-center gap-3 rounded-xl px-4 py-3"
+          style={{
+            background: 'rgba(29,158,117,0.15)',
+            border: '0.5px solid rgba(29,158,117,0.30)',
+          }}
+        >
           <i className="ti ti-circle-check text-lg text-[#0F6E56]" />
           <div className="flex-1">
-            <div className="text-sm font-semibold text-[#085041]">
+            <div className="text-sm font-semibold text-[#5DCAA5]">
               {selectedArea.name} selected
             </div>
-            <div className="mt-0.5 text-xs text-[#0F6E56]">
+            <div className="mt-0.5 text-xs text-[#9FE1CB]">
               {selectedArea.corridor.toUpperCase()} corridor · Overall score:{' '}
               {selectedArea.overall_score}/100
             </div>
@@ -285,7 +311,7 @@ export default function DecisionPanel({
           <button
             type="button"
             onClick={handleChangeArea}
-            className="flex-shrink-0 text-xs text-[#0F6E56] underline hover:text-[#085041]"
+            className="flex-shrink-0 text-xs text-[#5DCAA5] underline hover:text-[#9FE1CB]"
           >
             Change
           </button>
@@ -308,7 +334,10 @@ export default function DecisionPanel({
       )}
 
       {showNotFound && (
-        <div className="py-4 text-center text-sm text-gray-400">
+        <div
+          className="py-4 text-center text-sm"
+          style={{ color: 'rgba(255,255,255,0.40)' }}
+        >
           Area not found in our database yet. Try searching Sholinganallur,
           Kelambakkam, or other OMR/ECR areas.
         </div>

@@ -16,26 +16,36 @@ export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps)
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="relative w-full max-w-sm rounded-2xl bg-white p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+      <div
+        className="relative w-full max-w-sm rounded-[20px] p-6"
+        style={{
+          background: '#0F2D1E',
+          border: '0.5px solid rgba(255,255,255,0.15)',
+        }}
+      >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 cursor-pointer text-gray-400 hover:text-gray-600"
+          className="absolute right-4 top-4 cursor-pointer hover:opacity-80"
+          style={{ color: 'rgba(255,255,255,0.35)' }}
           aria-label="Close"
         >
           <i className="ti ti-x" style={{ fontSize: 18 }} />
         </button>
 
         <div className="mb-2 text-center text-xl font-semibold">
-          <span className="text-gray-900">Prop</span>
+          <span className="text-white">Prop</span>
           <span style={{ color: '#1D9E75' }}>XLA</span>
         </div>
 
-        <h2 className="mb-1 text-center text-lg font-semibold text-gray-900">
+        <h2 className="mb-1 text-center text-lg font-semibold text-white">
           Unlock unlimited reports
         </h2>
-        <p className="mb-6 text-center text-sm text-gray-500">
+        <p
+          className="mb-6 text-center text-sm"
+          style={{ color: 'rgba(255,255,255,0.50)' }}
+        >
           You&apos;ve viewed 2 free reports. Sign in to continue — it&apos;s free and takes
           10 seconds.
         </p>
@@ -43,8 +53,13 @@ export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps)
         <div className="mb-2 flex flex-col gap-2">
           {BENEFITS.map((benefit) => (
             <div key={benefit} className="flex items-center gap-2">
-              <i className="ti ti-check flex-shrink-0" style={{ color: '#0F6E56', fontSize: 16 }} />
-              <span className="text-sm text-gray-600">{benefit}</span>
+              <i
+                className="ti ti-check flex-shrink-0"
+                style={{ color: '#1D9E75', fontSize: 16 }}
+              />
+              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                {benefit}
+              </span>
             </div>
           ))}
         </div>
@@ -52,7 +67,17 @@ export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps)
         <button
           type="button"
           onClick={onSignIn}
-          className="mt-6 flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-gray-200 bg-white py-3 text-sm font-medium text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+          className="mt-6 flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl py-3 text-sm font-medium text-white transition-colors"
+          style={{
+            background: 'rgba(255,255,255,0.08)',
+            border: '0.5px solid rgba(255,255,255,0.15)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.12)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+          }}
         >
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden>
             <path
@@ -75,7 +100,10 @@ export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps)
           Continue with Google
         </button>
 
-        <p className="mt-3 text-center text-xs text-gray-400">
+        <p
+          className="mt-3 text-center text-xs"
+          style={{ color: 'rgba(255,255,255,0.25)' }}
+        >
           Free forever · No credit card · No spam
         </p>
       </div>

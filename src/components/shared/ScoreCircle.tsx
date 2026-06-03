@@ -10,10 +10,32 @@ const SIZES = {
 } as const
 
 function getColors(score: number) {
-  if (score >= 80) return { border: '#1D9E75', bg: '#E1F5EE', text: '#085041' }
-  if (score >= 65) return { border: '#639922', bg: '#EAF3DE', text: '#3B6D11' }
-  if (score >= 50) return { border: '#BA7517', bg: '#FAEEDA', text: '#633806' }
-  return { border: '#E24B4A', bg: '#FCEBEB', text: '#791F1F' }
+  if (score >= 80) {
+    return {
+      border: '#1D9E75',
+      bg: 'rgba(29,158,117,0.15)',
+      text: '#5DCAA5',
+    }
+  }
+  if (score >= 65) {
+    return {
+      border: '#639922',
+      bg: 'rgba(99,153,34,0.15)',
+      text: '#9FE1CB',
+    }
+  }
+  if (score >= 50) {
+    return {
+      border: '#BA7517',
+      bg: 'rgba(186,117,23,0.15)',
+      text: '#FAC775',
+    }
+  }
+  return {
+    border: '#E24B4A',
+    bg: 'rgba(226,75,74,0.15)',
+    text: '#F09595',
+  }
 }
 
 export default function ScoreCircle({ score, size = 'md' }: ScoreCircleProps) {
@@ -38,7 +60,13 @@ export default function ScoreCircle({ score, size = 'md' }: ScoreCircleProps) {
       <span style={{ fontSize: scoreFont, fontWeight: 700, lineHeight: 1 }}>
         {score}
       </span>
-      <span style={{ fontSize: labelFont, opacity: 0.7, lineHeight: 1 }}>
+      <span
+        style={{
+          fontSize: labelFont,
+          lineHeight: 1,
+          color: 'rgba(255,255,255,0.40)',
+        }}
+      >
         /100
       </span>
     </div>

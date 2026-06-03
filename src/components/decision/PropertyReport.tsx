@@ -3,7 +3,7 @@ import ScoreCircle from '@/components/shared/ScoreCircle'
 import ShareButtons from '@/components/shared/ShareButtons'
 import CorridorBadge from '@/components/shared/CorridorBadge'
 import { computeScore, getBrokerGap } from '@/lib/scoring'
-import { getVerdict, SIGNAL_COLORS, INTENTS } from '@/lib/constants'
+import { getVerdict, INTENTS } from '@/lib/constants'
 
 interface PropertyReportProps {
   area: Area
@@ -12,16 +12,49 @@ interface PropertyReportProps {
 }
 
 const FLAG_STYLES = {
-  danger: { bg: '#FCEBEB', border: '#F7C1C1', title: '#791F1F', iconBg: '#FCEBEB', pill: '#791F1F', pillBg: '#FCEBEB', pillLabel: 'High risk' },
-  warn: { bg: '#FAEEDA', border: '#FAC775', title: '#633806', iconBg: '#FAEEDA', pill: '#633806', pillBg: '#FAEEDA', pillLabel: 'Check this' },
-  good: { bg: '#EAF3DE', border: '#C0DD97', title: '#27500A', iconBg: '#EAF3DE', pill: '#3B6D11', pillBg: '#EAF3DE', pillLabel: 'Positive' },
+  danger: {
+    bg: 'rgba(226,75,74,0.10)',
+    border: 'rgba(226,75,74,0.25)',
+    title: '#F09595',
+    body: 'rgba(240,149,149,0.70)',
+    iconBg: 'rgba(226,75,74,0.15)',
+    pill: '#F09595',
+    pillBg: 'rgba(226,75,74,0.20)',
+    pillLabel: 'High risk',
+  },
+  warn: {
+    bg: 'rgba(186,117,23,0.10)',
+    border: 'rgba(186,117,23,0.25)',
+    title: '#FAC775',
+    body: 'rgba(250,199,117,0.70)',
+    iconBg: 'rgba(186,117,23,0.15)',
+    pill: '#FAC775',
+    pillBg: 'rgba(186,117,23,0.20)',
+    pillLabel: 'Check this',
+  },
+  good: {
+    bg: 'rgba(29,158,117,0.10)',
+    border: 'rgba(29,158,117,0.25)',
+    title: '#5DCAA5',
+    body: 'rgba(93,202,165,0.70)',
+    iconBg: 'rgba(29,158,117,0.15)',
+    pill: '#5DCAA5',
+    pillBg: 'rgba(29,158,117,0.20)',
+    pillLabel: 'Positive',
+  },
 } as const
 
 function scoreColor(score: number): string {
-  if (score >= 80) return '#085041'
-  if (score >= 65) return '#3B6D11'
-  if (score >= 50) return '#633806'
-  return '#791F1F'
+  if (score >= 80) return '#5DCAA5'
+  if (score >= 65) return '#9FE1CB'
+  if (score >= 50) return '#FAC775'
+  return '#F09595'
+}
+
+function verdictBadgeDark(type: 'good' | 'warn' | 'danger') {
+  if (type === 'good') return { bg: 'rgba(29,158,117,0.20)', color: '#5DCAA5' }
+  if (type === 'warn') return { bg: 'rgba(186,117,23,0.15)', color: '#FAC775' }
+  return { bg: 'rgba(226,75,74,0.15)', color: '#F09595' }
 }
 
 function progressBarColor(score: number): string {
@@ -35,7 +68,7 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
   const result = computeScore(area, intent as Intent)
   const gap = getBrokerGap(area)
   const verdict = getVerdict(result.overall)
-  const verdictColors = SIGNAL_COLORS[verdict.type]
+  const verdictDark = verdictBadgeDark(verdict.type)
 
   const flags: Flag[] = [
     {
@@ -119,11 +152,14 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
   return (
     <div className="flex flex-col">
       {/* Section 1 — Hero */}
-      <div className="mb-3 rounded-2xl border border-gray-100 bg-white p-4">
+      <div
+        className="glass-high mb-3 rounded-[20px] p-4"
+        style={{ borderRadius: 20 }}
+      >
         <div className="flex items-start justify-between">
           <div>
-            <div className="text-lg font-semibold text-gray-900">{address}</div>
-            <div className="mt-0.5 text-xs text-gray-400">
+            <div className="text-lg font-semibold text-white">{address}</div>
+            <div className="mt-0.5 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
               {area.name} · {INTENTS[intent as Intent]?.label ?? intent}
             </div>
             <div className="mt-2">
@@ -138,15 +174,21 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
                 fontSize: 10,
                 padding: '2px 8px',
                 borderRadius: 999,
-                backgroundColor: verdictColors.bg,
-                color: verdictColors.color,
+                backgroundColor: verdictDark.bg,
+                color: verdictDark.color,
               }}
             >
               {verdict.label}
             </span>
           </div>
         </div>
-        <p className="mt-3 border-t border-gray-100 pt-3 text-xs text-gray-500">
+        <p
+          className="mt-3 border-t pt-3 text-xs"
+          style={{
+            borderColor: 'rgba(255,255,255,0.10)',
+            color: 'rgba(255,255,255,0.50)',
+          }}
+        >
           {verdictSummary()}
         </p>
       </div>
@@ -154,15 +196,30 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
       {/* Section 2 — Metrics */}
       <div className="mb-3 grid grid-cols-3 gap-2">
         {metrics.map((metric) => (
-          <div key={metric.label} className="rounded-xl bg-gray-50 p-3">
-            <div className="mb-1 text-[10px] uppercase tracking-wide text-gray-400">
+          <div
+            key={metric.label}
+            className="rounded-xl p-3"
+            style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 12 }}
+          >
+            <div
+              className="mb-1 text-[10px] uppercase tracking-wide"
+              style={{ color: 'rgba(255,255,255,0.40)' }}
+            >
               {metric.label}
             </div>
             <div className="text-xl font-bold" style={{ color: scoreColor(metric.value) }}>
               {metric.value}
-              <span className="text-xs font-normal text-gray-400">/100</span>
+              <span
+                className="text-xs font-normal"
+                style={{ color: 'rgba(255,255,255,0.35)' }}
+              >
+                /100
+              </span>
             </div>
-            <div className="mt-2 h-[3px] w-full rounded-full bg-gray-200">
+            <div
+              className="mt-2 h-[3px] w-full rounded-full"
+              style={{ background: 'rgba(255,255,255,0.10)' }}
+            >
               <div
                 className="h-[3px] rounded-full transition-all duration-500"
                 style={{
@@ -171,7 +228,12 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
                 }}
               />
             </div>
-            <div className="mt-1 text-[10px] text-gray-400">{metric.sub}</div>
+            <div
+              className="mt-1 text-[10px]"
+              style={{ color: 'rgba(255,255,255,0.35)' }}
+            >
+              {metric.sub}
+            </div>
           </div>
         ))}
       </div>
@@ -180,29 +242,35 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
       <div className="mb-3 flex flex-col gap-2">
         <div
           className="flex items-start gap-2 rounded-xl p-2.5"
-          style={{ backgroundColor: '#E1F5EE' }}
+          style={{
+            background: 'rgba(29,158,117,0.20)',
+            border: '0.5px solid rgba(29,158,117,0.25)',
+          }}
         >
           <div
             className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full"
-            style={{ color: '#0F6E56' }}
+            style={{ color: '#5DCAA5' }}
           >
             <i className="ti ti-sparkles" style={{ fontSize: 12 }} />
           </div>
-          <p className="text-xs leading-relaxed" style={{ color: '#085041' }}>
+          <p className="text-xs leading-relaxed" style={{ color: '#9FE1CB' }}>
             {result.boost}
           </p>
         </div>
         <div
           className="flex items-start gap-2 rounded-xl p-2.5"
-          style={{ backgroundColor: '#FFF8E7' }}
+          style={{
+            background: 'rgba(186,117,23,0.15)',
+            border: '0.5px solid rgba(186,117,23,0.25)',
+          }}
         >
           <div
             className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center"
-            style={{ color: '#854F0B' }}
+            style={{ color: '#FAC775' }}
           >
             <i className="ti ti-alert-triangle" style={{ fontSize: 12 }} />
           </div>
-          <p className="text-xs leading-relaxed" style={{ color: '#633806' }}>
+          <p className="text-xs leading-relaxed" style={{ color: '#EF9F27' }}>
             {result.warning}
           </p>
         </div>
@@ -215,8 +283,11 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
           return (
             <div
               key={index}
-              className="overflow-hidden rounded-xl border"
-              style={{ borderColor: style.border }}
+              className="overflow-hidden rounded-xl"
+              style={{
+                background: style.bg,
+                border: `0.5px solid ${style.border}`,
+              }}
             >
               <div className="flex items-center gap-3 p-3">
                 <div
@@ -235,7 +306,10 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
                   >
                     {flag.title}
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-gray-500">
+                  <p
+                    className="mt-0.5 line-clamp-2 text-xs leading-relaxed"
+                    style={{ color: style.body }}
+                  >
                     {flag.body}
                   </p>
                 </div>
@@ -255,10 +329,17 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
       </div>
 
       {/* Section 5 — Price trend */}
-      <div className="mb-3 rounded-2xl border border-gray-100 bg-white p-4">
+      <div
+        className="mb-3 rounded-2xl p-4"
+        style={{
+          background: 'rgba(255,255,255,0.06)',
+          border: '0.5px solid rgba(255,255,255,0.10)',
+          borderRadius: 16,
+        }}
+      >
         <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Price trend</span>
-          <span className="text-xs text-gray-400">
+          <span className="text-sm font-medium text-white">Price trend</span>
+          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
             {firstTrend.year} → {lastTrend.year}
           </span>
         </div>
@@ -288,51 +369,75 @@ export default function PropertyReport({ area, intent, address }: PropertyReport
           {trendPoints.map((p, i) => (
             <span
               key={p.year}
-              className="text-[9px] text-gray-400"
-              style={{ flex: 1, textAlign: i === 0 ? 'left' : i === trendPoints.length - 1 ? 'right' : 'center' }}
+              className="text-[9px]"
+              style={{
+                flex: 1,
+                textAlign: i === 0 ? 'left' : i === trendPoints.length - 1 ? 'right' : 'center',
+                color: 'rgba(255,255,255,0.35)',
+              }}
             >
               {p.year}
             </span>
           ))}
         </div>
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-xs text-gray-400">
+          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>
             ₹{firstTrend.psf.toLocaleString()}/sqft
           </span>
-          <span className="text-sm font-semibold text-[#1D9E75]">
+          <span className="text-sm font-semibold text-[#5DCAA5]">
             ₹{lastTrend.psf.toLocaleString()}/sqft
           </span>
           <span
-            className="rounded-full px-2 py-0.5 text-xs font-medium text-[#0F6E56]"
-            style={{ backgroundColor: '#E1F5EE' }}
+            className="rounded-full px-2 py-0.5 text-xs font-medium text-[#5DCAA5]"
+            style={{ background: 'rgba(29,158,117,0.20)' }}
           >
             {growthPct >= 0 ? '+' : ''}
             {growthPct}% in {yearSpan} years
           </span>
         </div>
 
-        <div className="mt-3 border-t border-gray-100 pt-3">
-          <div className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">
+        <div
+          className="mt-3 border-t pt-3"
+          style={{ borderColor: 'rgba(255,255,255,0.08)' }}
+        >
+          <div
+            className="mb-2 text-xs font-medium uppercase tracking-wide"
+            style={{ color: 'rgba(255,255,255,0.35)' }}
+          >
             Recent registered sales
           </div>
           {area.transactions.slice(0, 3).map((transaction) => (
             <div
               key={`${transaction.unit}-${transaction.date}`}
-              className="flex items-center justify-between border-b border-gray-50 py-1.5 last:border-0"
+              className="flex items-center justify-between py-1.5 last:border-0"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
             >
               <div>
-                <div className="text-xs text-gray-600">{transaction.unit}</div>
-                <div className="mt-0.5 text-[10px] text-gray-400">{transaction.date}</div>
+                <div className="text-xs" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                  {transaction.unit}
+                </div>
+                <div
+                  className="mt-0.5 text-[10px]"
+                  style={{ color: 'rgba(255,255,255,0.30)' }}
+                >
+                  {transaction.date}
+                </div>
               </div>
               <div className="text-right">
-                <div className="text-sm font-semibold text-gray-800">{transaction.total}</div>
-                <div className="mt-0.5 text-[10px] text-gray-400">
+                <div className="text-sm font-semibold text-white">{transaction.total}</div>
+                <div
+                  className="mt-0.5 text-[10px]"
+                  style={{ color: 'rgba(255,255,255,0.40)' }}
+                >
                   ₹{transaction.psf}/sqft
                 </div>
               </div>
             </div>
           ))}
-          <p className="mt-2 text-right text-[10px] text-gray-300">
+          <p
+            className="mt-2 text-right text-[10px]"
+            style={{ color: 'rgba(255,255,255,0.20)' }}
+          >
             Source: Registered sale data · TNREGINET
           </p>
         </div>
