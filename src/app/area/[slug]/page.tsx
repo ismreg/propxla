@@ -18,7 +18,7 @@ function formatFloodRisk(floodRisk: Area['flood_risk']): string {
 
 function buildIntroParagraph(area: Area, gap: number): string {
   const corridorLabel = CORRIDORS[area.corridor].label
-  return `${area.name} is located on the ${corridorLabel}, ${area.distance_from_city} km from Chennai Central. Registered sale prices average ₹${area.reg_avg_psf.toLocaleString('en-IN')}/sqft while brokers quote ₹${area.broker_ask_psf.toLocaleString('en-IN')}/sqft — a ${gap}% premium. PropNXT rates ${area.name} ${area.overall_score}/100 based on price truth, flood risk, metro connectivity, and IT corridor proximity.`
+  return `${area.name} is located on the ${corridorLabel}, ${area.distance_from_city} km from Chennai Central. Registered sale prices average ₹${area.reg_avg_psf.toLocaleString('en-IN')}/sqft while brokers quote ₹${area.broker_ask_psf.toLocaleString('en-IN')}/sqft — a ${gap}% premium. PropXLA rates ${area.name} ${area.overall_score}/100 based on price truth, flood risk, metro connectivity, and IT corridor proximity.`
 }
 
 function buildJsonLd(area: Area) {
@@ -44,12 +44,12 @@ export async function generateMetadata({ params }: AreaPageProps): Promise<Metad
   const area = await getAreaBySlug(slug)
 
   if (!area) {
-    return { title: 'Area not found · PropNXT' }
+    return { title: 'Area not found · PropXLA' }
   }
 
   const gap = getBrokerGap(area)
   const title = `${area.name} Property Price 2024 · Registered Rates & Investment Score`
-  const description = `${area.name} registered property price: ₹${area.reg_avg_psf.toLocaleString('en-IN')}/sqft. Broker asking ₹${area.broker_ask_psf.toLocaleString('en-IN')}/sqft — ${gap}% premium. Flood risk: ${formatFloodRisk(area.flood_risk)}. PropNXT score: ${area.overall_score}/100.`
+  const description = `${area.name} registered property price: ₹${area.reg_avg_psf.toLocaleString('en-IN')}/sqft. Broker asking ₹${area.broker_ask_psf.toLocaleString('en-IN')}/sqft — ${gap}% premium. Flood risk: ${formatFloodRisk(area.flood_risk)}. PropXLA score: ${area.overall_score}/100.`
 
   return {
     title,

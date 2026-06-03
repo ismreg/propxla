@@ -3,13 +3,13 @@ export default function Header() {
     <header className="flex items-end justify-between bg-transparent px-0 pb-3 pt-5">
       <div>
         <div
-          style={{ fontSize: 17, fontWeight: 500, letterSpacing: '-0.02em' }}
+          style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1 }}
         >
           <span className="text-white">Prop</span>
-          <span style={{ color: '#1D9E75' }}>NXT</span>
+          <span style={{ color: '#1D9E75' }}>XLA</span>
         </div>
-        <div className="text-xs" style={{ marginTop: 2, color: 'rgba(255,255,255,0.40)' }}>
-          Chennai · OMR &amp; ECR corridors
+        <div className="text-xs" style={{ marginTop: 3, color: 'rgba(255,255,255,0.40)', letterSpacing: '0.02em' }}>
+          Know before you buy
         </div>
       </div>
       <div className="text-right text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>

@@ -18,7 +18,7 @@ export default function ReportPageClient({ area, intent }: ReportPageClientProps
 
   function handleShare() {
     const url = window.location.href
-    const message = `Checked ${area.name} on PropNXT — scored ${result.overall}/100 for ${intent}. Broker is ${gap}% above registered prices.`
+    const message = `Checked ${area.name} on PropXLA — scored ${result.overall}/100 for ${intent}. Broker is ${gap}% above registered prices.`
     window.open(
       `https://wa.me/?text=${encodeURIComponent(`${message} ${url}`)}`,
       '_blank',

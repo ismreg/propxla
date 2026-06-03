@@ -41,7 +41,7 @@ export async function generateMetadata({
   const parsed = parseCompareSlugs(slug)
 
   if (!parsed) {
-    return { title: 'Compare · PropNXT' }
+    return { title: 'Compare · PropXLA' }
   }
 
   const { slug1, slug2 } = parsed
@@ -51,7 +51,7 @@ export async function generateMetadata({
   ])
 
   if (!area1 || !area2) {
-    return { title: 'Compare · PropNXT' }
+    return { title: 'Compare · PropXLA' }
   }
 
   const intent = resolveIntent(intentParam)
@@ -73,7 +73,7 @@ export async function generateMetadata({
       `best area buy property Chennai OMR`,
     ],
     openGraph: {
-      title: `${area1.name} vs ${area2.name} | PropNXT`,
+      title: `${area1.name} vs ${area2.name} | PropXLA`,
       description: `${area1.name} scores ${score1}/100 vs ${area2.name} scores ${score2}/100 for ${intent}`,
       url: `https://propxla.com/compare/${slug}`,
     },

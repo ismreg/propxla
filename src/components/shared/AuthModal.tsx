@@ -36,7 +36,7 @@ export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps)
 
         <div className="mb-2 text-center text-xl font-semibold">
           <span className="text-white">Prop</span>
-          <span style={{ color: '#1D9E75' }}>NXT</span>
+          <span style={{ color: '#1D9E75' }}>XLA</span>
         </div>
 
         <h2 className="mb-1 text-center text-lg font-semibold text-white">

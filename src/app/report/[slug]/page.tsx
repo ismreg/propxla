@@ -29,13 +29,13 @@ export async function generateMetadata({
   const area = await getAreaBySlug(slug)
 
   if (!area) {
-    return { title: 'Report not found · PropNXT' }
+    return { title: 'Report not found · PropXLA' }
   }
 
   const intent = parseIntent(intentParam)
   const intentLabel = INTENTS[intent]?.label ?? intent
   const gap = getBrokerGap(area)
-  const title = `${area.name} Property Report · PropNXT`
+  const title = `${area.name} Property Report · PropXLA`
   const description = `${area.name} scored ${area.overall_score}/100 for ${intentLabel.toLowerCase()}. Broker quoting ${gap}% above registered prices. Check flood risk and CRZ status.`
 
   return {

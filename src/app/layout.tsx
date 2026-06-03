@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'PropNXT — Chennai Property Intelligence | OMR & ECR Price Truth',
-    template: '%s | PropNXT Chennai',
+    default: 'PropXLA — Chennai Property Intelligence | OMR & ECR Price Truth',
+    template: '%s | PropXLA Chennai',
   },
   description:
     'Check real registered property prices vs broker quotes for OMR and ECR corridors in Chennai. Flood risk scores, price trends, and investment intelligence for 25+ localities.',
@@ -30,16 +30,16 @@ export const metadata: Metadata = {
     'Chennai flood risk property',
     'property investment OMR Chennai',
     'broker vs registered price Chennai',
-    'PropNXT',
+    'PropXLA',
   ],
-  authors: [{ name: 'PropNXT' }],
-  creator: 'PropNXT',
+  authors: [{ name: 'PropXLA' }],
+  creator: 'PropXLA',
   openGraph: {
     type: 'website',
     locale: 'en_IN',
     url: 'https://propxla.com',
-    siteName: 'PropNXT',
-    title: 'PropNXT — Chennai Property Intelligence',
+    siteName: 'PropXLA',
+    title: 'PropXLA — Chennai Property Intelligence',
     description:
       'Real registered prices vs broker quotes. Flood risk. Investment scores. 25+ OMR & ECR localities.',
     images: [
@@ -47,13 +47,13 @@ export const metadata: Metadata = {
         url: 'https://propxla.com/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'PropNXT Chennai Property Intelligence',
+        alt: 'PropXLA Chennai Property Intelligence',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PropNXT — Chennai Property Intelligence',
+    title: 'PropXLA — Chennai Property Intelligence',
     description: 'Real registered prices vs broker quotes for OMR & ECR Chennai.',
     images: ['https://propxla.com/og-image.png'],
   },

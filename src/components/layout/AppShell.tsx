@@ -14,18 +14,26 @@ interface AppShellProps {
 function DefaultLogo() {
   return (
     <div>
-      <span
+      <div
         style={{
-          fontSize: 16,
-          fontWeight: 600,
+          fontSize: 18,
+          fontWeight: 700,
           color: 'white',
-          letterSpacing: '-0.02em',
+          letterSpacing: '-0.03em',
+          lineHeight: 1,
         }}
       >
-        Prop<span style={{ color: '#1D9E75' }}>NXT</span>
-      </span>
-      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 1 }}>
-        Chennai · OMR & ECR
+        Prop<span style={{ color: '#1D9E75' }}>XLA</span>
+      </div>
+      <div
+        style={{
+          fontSize: 10,
+          color: 'rgba(255,255,255,0.40)',
+          marginTop: 3,
+          letterSpacing: '0.02em',
+        }}
+      >
+        Know before you buy
       </div>
     </div>
   )

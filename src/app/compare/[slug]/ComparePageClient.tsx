@@ -38,7 +38,7 @@ export default function ComparePageClient({
   const loserScore = winner === 'area1' ? score2 : score1
 
   function buildShareMessage() {
-    return `Compared ${area1.name} vs ${area2.name} for ${activeIntent} on PropNXT — ${winnerArea.name} wins with ${winnerScore}/100`
+    return `Compared ${area1.name} vs ${area2.name} for ${activeIntent} on PropXLA — ${winnerArea.name} wins with ${winnerScore}/100`
   }
 
   function handleShare() {
