@@ -138,7 +138,6 @@ export default function DecisionPanel({
   const [inputValue, setInputValue] = useState(initialArea?.name ?? '')
   const [suggestions, setSuggestions] = useState<Area[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [placesReady, setPlacesReady] = useState(false)
   const [selectedIntent, setSelectedIntent] = useState<string | null>(null)
   const [selectedArea, setSelectedArea] = useState<Area | null>(initialArea)
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null)
@@ -188,35 +187,55 @@ export default function DecisionPanel({
     [areas]
   )
 
-  const initAutocomplete = useCallback(() => {
-    const input = document.getElementById('address-search-input') as HTMLInputElement | null
-    if (!input || !window.google?.maps?.places) return
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setInputValue(value)
+      setOutOfServiceArea((wasOutOfService) => {
+        if (wasOutOfService) {
+          setOutOfServiceAddress('')
+          return false
+        }
+        return wasOutOfService
+      })
 
+      const matches = areas.filter((area) =>
+        area.name.toLowerCase().includes(value.toLowerCase())
+      )
+      setSuggestions(matches.slice(0, 5))
+      setShowSuggestions(value.length > 0)
+    },
+    [areas]
+  )
+
+  const initAutocomplete = useCallback(() => {
     if (autocompleteRef.current) return
 
-    const autocomplete = new window.google.maps.places.Autocomplete(input, {
-      componentRestrictions: { country: 'in' },
-      bounds: new window.google.maps.LatLngBounds(
-        { lat: 12.6, lng: 80.05 },
-        { lat: 13.1, lng: 80.35 }
-      ),
-      strictBounds: false,
-      types: ['geocode', 'establishment'],
-    })
+    const input = document.getElementById(
+      'address-search-input'
+    ) as HTMLInputElement | null
+    if (!input || !window.google?.maps?.places) return
 
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace()
-      if (!place.geometry?.location) return
+    try {
+      const autocomplete = new window.google.maps.places.Autocomplete(input, {
+        componentRestrictions: { country: 'in' },
+        types: ['geocode', 'establishment'],
+      })
 
-      const lat = place.geometry.location.lat()
-      const lng = place.geometry.location.lng()
-      const formattedAddress = place.formatted_address || place.name || ''
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace()
+        if (!place.geometry?.location) return
 
-      handleAddressSelected(lat, lng, formattedAddress)
-    })
+        const lat = place.geometry.location.lat()
+        const lng = place.geometry.location.lng()
+        const address = place.formatted_address || place.name || ''
 
-    autocompleteRef.current = autocomplete
-    setPlacesReady(true)
+        handleAddressSelected(lat, lng, address)
+      })
+
+      autocompleteRef.current = autocomplete
+    } catch (err) {
+      console.log('Places autocomplete not available:', err)
+    }
   }, [handleAddressSelected])
 
   useEffect(() => {
@@ -235,42 +254,42 @@ export default function DecisionPanel({
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY
     if (!apiKey) return
 
-    if (window.google?.maps?.places) {
+    let cancelled = false
+
+    const runInit = () => {
+      if (cancelled) return
       initAutocomplete()
-      return
+    }
+
+    if (window.google?.maps?.places) {
+      runInit()
+      return () => {
+        cancelled = true
+      }
     }
 
     const existing = document.querySelector('script[data-google-places]')
     if (existing) {
-      existing.addEventListener('load', initAutocomplete)
-      return () => existing.removeEventListener('load', initAutocomplete)
+      existing.addEventListener('load', runInit)
+      return () => {
+        cancelled = true
+        existing.removeEventListener('load', runInit)
+      }
     }
 
     const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`
     script.async = true
     script.dataset.googlePlaces = 'true'
-    script.onload = () => initAutocomplete()
+    script.onload = runInit
     document.head.appendChild(script)
 
     return () => {
+      cancelled = true
       script.onload = null
+      autocompleteRef.current = null
     }
   }, [initAutocomplete])
-
-  function handleInputChange(value: string) {
-    setInputValue(value)
-    if (outOfServiceArea) {
-      setOutOfServiceArea(false)
-      setOutOfServiceAddress('')
-    }
-
-    const matches = areas.filter((area) =>
-      area.name.toLowerCase().includes(value.toLowerCase())
-    )
-    setSuggestions(matches.slice(0, 5))
-    setShowSuggestions(value.length > 0)
-  }
 
   function selectArea(area: Area) {
     setInputValue(area.name)
@@ -418,8 +437,12 @@ export default function DecisionPanel({
 
       <div className="relative mb-3">
         <i
-          className="ti ti-search pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2"
-          style={{ fontSize: 16, color: 'rgba(255,255,255,0.40)' }}
+          className="ti ti-search pointer-events-none absolute top-1/2 z-10 -translate-y-1/2"
+          style={{
+            left: 12,
+            fontSize: 16,
+            color: 'rgba(255,255,255,0.40)',
+          }}
         />
         <input
           ref={inputRef}
@@ -428,14 +451,23 @@ export default function DecisionPanel({
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => {
-            if (inputValue.length > 0 && !placesReady) setShowSuggestions(true)
+            if (inputValue.length > 0) setShowSuggestions(true)
           }}
           onBlur={() => {
             setTimeout(() => setShowSuggestions(false), 150)
           }}
-          placeholder="Enter address, project name or area..."
-          className="w-full py-3 pl-10 pr-4 text-sm"
+          placeholder="Enter address or project name..."
           autoComplete="off"
+          style={{
+            width: '100%',
+            background: 'rgba(255,255,255,0.08)',
+            border: '0.5px solid rgba(255,255,255,0.15)',
+            borderRadius: 12,
+            padding: '10px 14px 10px 40px',
+            fontSize: 14,
+            color: 'white',
+            outline: 'none',
+          }}
         />
         {showAreaFallback && (
           <div

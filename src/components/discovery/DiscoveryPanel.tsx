@@ -76,113 +76,163 @@ export default function DiscoveryPanel({
     router.push(`/compare/${compareSelections[0]}-vs-${compareSelections[1]}`)
   }
 
+  const fullBleed = {
+    marginLeft: -16,
+    marginRight: -16,
+    width: 'calc(100% + 32px)',
+  } as const
+
   return (
-    <div>
+    <div style={{ background: 'transparent' }}>
       <div
-        className="mb-4"
         style={{
-          background: 'rgba(255,255,255,0.04)',
-          border: '0.5px solid rgba(255,255,255,0.08)',
-          borderRadius: 20,
-          padding: '20px 16px 16px',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+          ...fullBleed,
+          background: 'linear-gradient(180deg, #0e3d2a 0%, #0a2d1e 100%)',
+          padding: '22px 20px 18px',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 0,
+          marginBottom: 0,
         }}
       >
-        <h2
-          className="text-center"
+        <div
           style={{
-            fontSize: 20,
-            fontWeight: 700,
-            color: 'white',
-            letterSpacing: '-0.02em',
-            marginBottom: 6,
+            position: 'absolute',
+            top: -40,
+            right: -40,
+            width: 180,
+            height: 180,
+            background:
+              'radial-gradient(circle, rgba(29,158,117,0.15) 0%, transparent 65%)',
+            borderRadius: '50%',
+            pointerEvents: 'none',
+            zIndex: 0,
           }}
-        >
-          Find your next property in Chennai
-        </h2>
-        <p
-          className="text-center"
-          style={{
-            fontSize: 12,
-            color: 'rgba(255,255,255,0.40)',
-            marginBottom: 16,
-          }}
-        >
-          Real registered prices · Flood risk · Growth signals
-        </p>
+        />
 
-        <div className="relative w-full">
-          <i
-            className="ti ti-search pointer-events-none absolute top-1/2 -translate-y-1/2"
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h2
             style={{
-              left: 16,
-              fontSize: 18,
-              color: searchFocused ? '#1D9E75' : 'rgba(255,255,255,0.50)',
-            }}
-          />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-            placeholder="Search area — e.g. Sholinganallur, Kovalam..."
-            className="hero-search-input w-full text-white"
-          />
-        </div>
-
-        <div style={{ marginTop: 12 }}>
-          <div
-            style={{
-              fontSize: 10,
-              color: 'rgba(255,255,255,0.30)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              marginBottom: 8,
+              fontSize: 22,
+              fontWeight: 800,
+              letterSpacing: '-0.03em',
+              color: 'white',
+              textAlign: 'center',
+              position: 'relative',
+              zIndex: 1,
+              marginBottom: 6,
             }}
           >
-            Quick filters
+            Discover the smartest areas to buy in Chennai
+          </h2>
+          <p
+            className="text-center"
+            style={{
+              fontSize: 12,
+              color: 'rgba(255,255,255,0.45)',
+              marginBottom: 14,
+            }}
+          >
+            Registered price truth · Flood risk · Growth signals · 25 localities
+          </p>
+
+          <div
+            className="relative w-full"
+            style={{
+              background: 'rgba(0,0,0,0.20)',
+              border: '1.5px solid rgba(255,255,255,0.20)',
+              borderRadius: 12,
+            }}
+          >
+            <i
+              className="ti ti-search pointer-events-none absolute top-1/2 z-10 -translate-y-1/2"
+              style={{
+                left: 16,
+                fontSize: 18,
+                color: searchFocused ? '#1D9E75' : 'rgba(255,255,255,0.50)',
+              }}
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              placeholder="Search area — e.g. Sholinganallur, Kovalam..."
+              className="hero-search-input w-full text-white"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                borderRadius: 12,
+                boxShadow: 'none',
+              }}
+            />
           </div>
-          <div className="flex flex-wrap gap-2">
-            {DISCOVERY_FILTERS.map((f) => {
-              const isActive = f.key === activeFilter
-              return (
-                <span
-                  key={f.key}
-                  onClick={() => setActiveFilter(f.key)}
-                  className="cursor-pointer"
-                  style={{
-                    fontSize: 12,
-                    padding: '4px 12px',
-                    borderRadius: 999,
-                    fontWeight: isActive ? 500 : 400,
-                    ...(isActive
-                      ? {
-                          background: '#1D9E75',
-                          color: 'white',
-                          border: 'none',
-                        }
-                      : {
-                          background: 'rgba(255,255,255,0.08)',
-                          border: '0.5px solid rgba(255,255,255,0.12)',
-                          color: 'rgba(255,255,255,0.50)',
-                        }),
-                  }}
-                >
-                  {f.label}
-                </span>
-              )
-            })}
+
+          <div style={{ marginTop: 12 }}>
+            <div
+              style={{
+                fontSize: 10,
+                color: 'rgba(255,255,255,0.30)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: 8,
+              }}
+            >
+              Quick filters
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {DISCOVERY_FILTERS.map((f) => {
+                const isActive = f.key === activeFilter
+                return (
+                  <span
+                    key={f.key}
+                    onClick={() => setActiveFilter(f.key)}
+                    className="cursor-pointer"
+                    style={{
+                      fontSize: 12,
+                      padding: '4px 12px',
+                      borderRadius: 999,
+                      ...(isActive
+                        ? {
+                            background: 'rgba(29,158,117,0.30)',
+                            border: '0.5px solid #1D9E75',
+                            borderColor: '#1D9E75',
+                            color: '#5DCAA5',
+                            fontWeight: 500,
+                          }
+                        : {
+                            background: 'rgba(0,0,0,0.20)',
+                            border: '0.5px solid rgba(255,255,255,0.15)',
+                            color: 'rgba(255,255,255,0.50)',
+                            fontWeight: 400,
+                          }),
+                    }}
+                  >
+                    {f.label}
+                  </span>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
 
       <div
-        className="mb-2 flex items-center justify-between gap-2 uppercase tracking-wide"
+        style={{
+          ...fullBleed,
+          background: 'rgba(0,0,0,0.30)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          padding: '14px 0 0 0',
+        }}
+      >
+      <div
+        className="flex items-center justify-between gap-2 uppercase tracking-wide"
         style={{
           fontSize: 11,
           color: 'rgba(255,255,255,0.35)',
+          marginBottom: 10,
+          padding: 0,
         }}
       >
         <span>
@@ -328,6 +378,7 @@ export default function DiscoveryPanel({
         style={{ color: 'rgba(255,255,255,0.30)' }}
       >
         Click any area to check a specific property there →
+      </div>
       </div>
     </div>
   )
